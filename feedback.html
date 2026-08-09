@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>意见反馈</title>
+    <style>
+        /* 基础重置与变量 */
+        :root {
+            --primary-color: #07c160;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-color); 
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 卡片容器 */
+        .feedback-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+
+        .icon { font-size: 48px; margin-bottom: 15px; }
+        h2 { font-size: 24px; margin-bottom: 10px; font-weight: 600; }
+        .desc { color: var(--text-sub); font-size: 15px; line-height: 1.6; margin-bottom: 30px; }
+
+        /* 主按钮 */
+        .mail-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px;
+            background: var(--primary-color);
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .mail-btn:hover { opacity: 0.9; }
+
+        /* 分割线 */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #ccc;
+            font-size: 12px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+        .divider span { padding: 0 10px; }
+
+        /* 备用复制区域 */
+        .backup-area {
+            background: #f8f9fa;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .email-text {
+            font-family: monospace;
+            font-size: 16px;
+            color: var(--text-main);
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-sub);
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+        /* 底部提示 */
+        .tips {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #999;
+            line-height: 1.8;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div class="feedback-card">
+        <div class="icon">📮</div>
+        <h2>意见反馈</h2>
+        <p class="desc">
+            遇到问题或有改进建议？<br>
+            请直接发送邮件，我们会在 1-3 个工作日内回复。
+        </p>
+
+        <!-- ⚠️ 请替换为你的真实邮箱 -->
+        <a id="mailBtn" class="mail-btn" href="#">
+            QQ群：233834600
+        </a>
+
+        <div class="divider"><span>若无法唤起邮箱客户端</span></div>
+
+        <div class="backup-area">
+            <div class="email-text" id="emailDisplay"></div>
+            <button class="copy-btn" onclick="copyEmail()">📋 复制邮箱地址</button>
+        </div>
+
+        <div class="tips">
+            💡 为便于快速定位问题，建议在邮件中附上：<br>
+            设备型号 / 浏览器版本 / 问题截图
+        </div>
+    </div>
+
+    <!-- Toast 提示元素 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ==========================================
+        // ⚙️ 配置区：只需修改这里
+        // ==========================================
+        const CONFIG = {
+            email: 'wubinhao1701599149@outlook.com',      // ← 替换为你的真实邮箱
+            subject: '【反馈】产品使用反馈',        // ← 邮件默认标题
+            body: `您好，\n\n我在 [使用场景] 遇到了以下问题：\n\n\n期望结果：\n\n\n设备/浏览器信息：`  // ← 邮件正文模板
+        };
+        // ==========================================
+
+        // 初始化页面
+        (function init() {
+            // 显示邮箱（做简单混淆防爬虫）
+            document.getElementById('emailDisplay').textContent = CONFIG.email;
+            
+            // 构建 mailto 链接（对中文和换行符进行 URL 编码）
+            const encodedSubject = encodeURIComponent(CONFIG.subject);
+            const encodedBody = encodeURIComponent(CONFIG.body);
+            document.getElementById('mailBtn').href = 
+                `mailto:${CONFIG.email}?subject=${encodedSubject}&body=${encodedBody}`;
+        })();
+
+        // 复制邮箱功能
+        async function copyEmail() {
+            try {
+                await navigator.clipboard.writeText(CONFIG.email);
+                showToast('✅ 邮箱已复制到剪贴板');
+            } catch {
+                // 兼容不支持 clipboard API 的旧浏览器
+                const input = document.createElement('input');
+                input.value = CONFIG.email;
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showToast('✅ 邮箱已复制到剪贴板');
+            }
+        }
+
+        // Toast 提示
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
