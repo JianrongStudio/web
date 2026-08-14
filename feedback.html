@@ -140,14 +140,14 @@
 
         <!-- ⚠️ 请替换为你的真实邮箱 -->
         <a id="mailBtn" class="mail-btn" href="#">
-            QQ群：233834600
+            wubinhao1701599149@outlook.com
         </a>
 
         <div class="divider"><span>若无法唤起邮箱客户端</span></div>
 
         <div class="backup-area">
             <div class="email-text" id="emailDisplay"></div>
-            <button class="copy-btn" onclick="copyEmail()">📋 复制邮箱地址</button>
+            <button class="copy-btn" onclick="copyEmail()">复制邮箱地址</button>
         </div>
 
         <div class="tips">
@@ -186,7 +186,7 @@
         async function copyEmail() {
             try {
                 await navigator.clipboard.writeText(CONFIG.email);
-                showToast('✅ 邮箱已复制到剪贴板');
+                showToast('邮箱已复制到剪贴板');
             } catch {
                 // 兼容不支持 clipboard API 的旧浏览器
                 const input = document.createElement('input');
@@ -197,7 +197,7 @@
                 input.select();
                 document.execCommand('copy');
                 document.body.removeChild(input);
-                showToast('✅ 邮箱已复制到剪贴板');
+                showToast('邮箱已复制到剪贴板');
             }
         }
 
