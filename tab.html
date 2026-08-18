@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jianrong Browser - Tab</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+        width: 100%; height: 100%; overflow: hidden;
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+    }
+
+    /* 背景层（模糊） */
+    #bg-layer {
+        position: fixed; top: -30px; left: -30px; right: -30px; bottom: -30px;
+        background-image: var(--bg-image, url("tab.png"));
+        background-size: cover; background-position: center;
+        filter: blur(14px); transform: scale(1.05);
+        z-index: -2; transition: background-image .4s ease;
+    }
+
+    /* 暗色遮罩，增强可读性 */
+    #overlay {
+        position: fixed; inset: 0;
+        background: rgba(0, 0, 0, 0.28);
+        z-index: -1;
+    }
+
+    /* 主内容 */
+    #content {
+        position: relative; width: 100%; height: 100%;
+        display: flex; flex-direction: column; align-items: center;
+        padding-top: 12vh; animation: fadeIn .6s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Bing 标题 */
+    #logo {
+        color: #fff; font-size: 54px; font-weight: 300; letter-spacing: 4px;
+        text-shadow: 0 2px 16px rgba(0,0,0,.5); margin-bottom: 28px; cursor: default;
+    }
+    #logo b { font-weight: 700; }
+
+    /* 搜索框 */
+    #search-form {
+        display: flex; width: 560px; max-width: 90vw; height: 48px;
+        background: rgba(255,255,255,.92); border-radius: 4px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.3); overflow: hidden;
+    }
+    #search-input {
+        flex: 1; border: none; outline: none; padding: 0 16px;
+        font-size: 16px; background: transparent; color: #1a1a1a;
+    }
+    #search-input::placeholder { color: #888; }
+    #search-btn {
+        width: 72px; border: none; cursor: pointer;
+        background: #0078d7; color: #fff; font-size: 15px;
+        display: flex; align-items: center; justify-content: center;
+        transition: background .15s;
+    }
+    #search-btn:hover { background: #0066b5; }
+
+    /* 收藏夹 */
+    #bookmarks-wrap {
+        width: 760px; max-width: 92vw; margin-top: 40px;
+    }
+    #bookmarks-title {
+        color: #fff; font-size: 13px; font-weight: 600;
+        text-shadow: 0 1px 6px rgba(0,0,0,.5); margin-bottom: 12px; padding-left: 4px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    #refresh-btn {
+        background: rgba(255,255,255,.18); border: none; color: #fff;
+        width: 22px; height: 22px; border-radius: 3px; cursor: pointer;
+        font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center;
+    }
+    #refresh-btn:hover { background: rgba(255,255,255,.32); }
+
+    #bookmarks {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+    }
+    .bm-card {
+        display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+        background: rgba(255,255,255,.16); border-radius: 4px;
+        cursor: pointer; text-decoration: none; color: #fff;
+        backdrop-filter: blur(6px); transition: background .15s, transform .15s;
+        overflow: hidden;
+    }
+    .bm-card:hover { background: rgba(255,255,255,.3); transform: translateY(-2px); }
+    .bm-icon { width: 20px; height: 20px; border-radius: 3px; flex-shrink: 0; object-fit: contain; background: rgba(255,255,255,.25); }
+    .bm-text { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+    .bm-empty { color: rgba(255,255,255,.6); font-size: 13px; grid-column: 1 / -1; text-align: center; padding: 20px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
+    /* 设置按钮 + 面板 */
+    #gear {
+        position: fixed; top: 16px; right: 16px; z-index: 10;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: rgba(255,255,255,.2); backdrop-filter: blur(6px);
+        border: none; cursor: pointer; color: #fff; font-size: 18px;
+        display: flex; align-items: center; justify-content: center;
+        transition: background .15s;
+    }
+    #gear:hover { background: rgba(255,255,255,.35); }
+
+    #panel {
+        position: fixed; top: 60px; right: 16px; z-index: 10;
+        width: 280px; padding: 16px; border-radius: 6px;
+        background: rgba(255,255,255,.95); box-shadow: 0 8px 32px rgba(0,0,0,.3);
+        display: none; flex-direction: column; gap: 14px; color: #1a1a1a;
+    }
+    #panel.show { display: flex; }
+    #panel h3 { font-size: 14px; font-weight: 600; }
+    .panel-row { display: flex; flex-direction: column; gap: 6px; }
+    .panel-row label { font-size: 12px; color: #555; }
+    .file-label {
+        display: inline-block; padding: 6px 12px; background: #0078d7; color: #fff;
+        border-radius: 3px; font-size: 12px; cursor: pointer; text-align: center; transition: background .15s;
+    }
+    .file-label:hover { background: #0066b5; }
+    .file-label input { display: none; }
+    .url-row { display: flex; gap: 6px; }
+    .url-row input { flex: 1; padding: 6px 8px; border: 1px solid #b0b0b0; border-radius: 3px; font-size: 12px; outline: none; }
+    .url-row input:focus { border-color: #0078d7; }
+    .url-row button { padding: 6px 10px; background: #0078d7; color: #fff; border: none; border-radius: 3px; font-size: 12px; cursor: pointer; }
+    .url-row button:hover { background: #0066b5; }
+    .reset-btn { padding: 6px; background: #e0e0e0; border: 1px solid #b0b0b0; border-radius: 3px; font-size: 12px; cursor: pointer; color: #1a1a1a; }
+    .reset-btn:hover { background: #d0d0d0; }
+    .hint { font-size: 11px; color: #888; }
+</style>
+</head>
+<body>
+    <div id="bg-layer"></div>
+    <div id="overlay"></div>
+
+    <button id="gear" title="设置背景">⚙</button>
+    <div id="panel">
+        <h3>背景设置</h3>
+        <div class="panel-row">
+            <label>上传本地图片</label>
+            <label class="file-label">
+                选择图片
+                <input type="file" id="file-input" accept="image/*">
+            </label>
+        </div>
+        <div class="panel-row">
+            <label>图片地址（URL）</label>
+            <div class="url-row">
+                <input type="text" id="url-input" placeholder="https://...">
+                <button id="url-btn">应用</button>
+            </div>
+        </div>
+        <div class="panel-row">
+            <button class="reset-btn" id="reset-btn">恢复默认背景</button>
+            <span class="hint">默认使用 tab.png，设置会保存在本地。</span>
+        </div>
+    </div>
+
+    <div id="content">
+        <h1 id="logo"><b>J</b>Tab</h1>
+        <form id="search-form" action="https://www.bing.com/search" method="GET" target="_self">
+            <input type="text" id="search-input" name="q" placeholder="在必应中搜索..." autocomplete="off">
+            <button type="submit" id="search-btn">搜索</button>
+        </form>
+
+        <div id="bookmarks-wrap">
+            <div id="bookmarks-title">收藏夹
+                <button id="refresh-btn" title="刷新收藏夹">↻</button>
+            </div>
+            <div id="bookmarks"></div>
+        </div>
+    </div>
+
+<script>
+(function () {
+    "use strict";
+
+    /* ====== 背景管理 ====== */
+    var DEFAULT_BG = 'url("tab.png")';
+    var root = document.documentElement;
+
+    function applyBg(value) {
+        if (!value) { value = DEFAULT_BG; }
+        // 兼容 url(...) 形式与纯路径
+        if (value.indexOf('url(') === 0 || value.indexOf('data:') === 0) {
+            if (value.indexOf('data:') === 0) value = 'url("' + value + '")';
+        } else {
+            value = 'url("' + value + '")';
+        }
+        root.style.setProperty('--bg-image', value);
+    }
+
+    function loadBg() {
+        try {
+            var saved = localStorage.getItem('startpage_bg');
+            applyBg(saved || DEFAULT_BG);
+        } catch (e) { applyBg(DEFAULT_BG); }
+    }
+
+    function saveBg(value) {
+        try { localStorage.setItem('startpage_bg', value); }
+        catch (e) { alert('背景保存失败：存储空间可能不足（图片过大）。'); }
+    }
+
+    // 上传图片 -> base64
+    document.getElementById('file-input').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+            var dataUrl = ev.target.result;
+            applyBg(dataUrl);
+            saveBg(dataUrl);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // URL 应用
+    document.getElementById('url-btn').addEventListener('click', function () {
+        var url = document.getElementById('url-input').value.trim();
+        if (!url) return;
+        applyBg(url);
+        saveBg(url);
+    });
+    document.getElementById('url-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { document.getElementById('url-btn').click(); }
+    });
+
+    // 恢复默认
+    document.getElementById('reset-btn').addEventListener('click', function () {
+        applyBg(DEFAULT_BG);
+        try { localStorage.removeItem('startpage_bg'); } catch (e) {}
+    });
+
+    // 设置面板切换
+    var panel = document.getElementById('panel');
+    document.getElementById('gear').addEventListener('click', function () {
+        panel.classList.toggle('show');
+    });
+    document.addEventListener('click', function (e) {
+        if (!panel.contains(e.target) && e.target.id !== 'gear') {
+            panel.classList.remove('show');
+        }
+    });
+
+    /* ====== 搜索框 ====== */
+    var searchInput = document.getElementById('search-input');
+    searchInput.focus();
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            var q = searchInput.value.trim();
+            if (q) {
+                // 若看起来像网址则直接跳转，否则用必应搜索
+                if (/^https?:\/\//i.test(q)) {
+                    window.location.href = q;
+                } else if (/^[\w-]+(\.[\w-]+)+.*$/.test(q) && q.indexOf(' ') === -1) {
+                    window.location.href = 'https://' + q;
+                } else {
+                    window.location.href = 'https://www.bing.com/search?q=' + encodeURIComponent(q);
+                }
+            }
+        }
+    });
+
+    /* ====== 收藏夹渲染 ====== */
+    var bmContainer = document.getElementById('bookmarks');
+
+    function getDomain(url) {
+        try { return new URL(url).hostname; }
+        catch (e) { return ''; }
+    }
+
+    function letterAvatar(title) {
+        var ch = (title || '?').trim().charAt(0).toUpperCase();
+        return ch;
+    }
+
+    function colorFromString(str) {
+        var hash = 0, i;
+        for (i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+        var h = Math.abs(hash) % 360;
+        return 'hsl(' + h + ', 55%, 50%)';
+    }
+
+    window.__setBookmarks = function (bookmarks) {
+        bmContainer.innerHTML = '';
+        if (!bookmarks || !bookmarks.length) {
+            var empty = document.createElement('div');
+            empty.className = 'bm-empty';
+            empty.textContent = '还没有收藏夹，点击地址栏旁的 ☆ 添加网站';
+            bmContainer.appendChild(empty);
+            return;
+        }
+        bookmarks.forEach(function (bm) {
+            var a = document.createElement('a');
+            a.className = 'bm-card';
+            a.href = bm.url;
+            a.title = bm.title + '\n' + bm.url;
+
+            var img = document.createElement('img');
+            img.className = 'bm-icon';
+            var domain = getDomain(bm.url);
+            if (domain) {
+                img.src = 'https://icons.duckduckgo.com/ip3/' + domain + '.ico';
+            }
+            img.alt = '';
+            img.referrerPolicy = 'no-referrer';
+            // 加载失败时用字母头像
+            img.addEventListener('error', function () {
+                var div = document.createElement('div');
+                div.className = 'bm-icon';
+                div.style.background = colorFromString(bm.title || bm.url);
+                div.style.color = '#fff';
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.justifyContent = 'center';
+                div.style.fontWeight = '700';
+                div.style.fontSize = '12px';
+                div.textContent = letterAvatar(bm.title);
+                img.replaceWith(div);
+            });
+
+            var span = document.createElement('span');
+            span.className = 'bm-text';
+            var t = (bm.title || bm.url).trim();
+            span.textContent = t.length > 14 ? t.slice(0, 13) + '…' : t;
+
+            a.appendChild(img);
+            a.appendChild(span);
+            bmContainer.appendChild(a);
+        });
+    };
+
+    // 刷新收藏夹（从 bookmarks.json 加载）
+    function loadBookmarks() {
+        fetch('bookmarks.json')
+            .then(function (r) { return r.json(); })
+            .then(function (data) { window.__setBookmarks(data); })
+            .catch(function () {
+                // fetch 失败时留空，等待 Python 注入
+                window.__setBookmarks([]);
+            });
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', loadBookmarks);
+
+    /* ====== 初始化 ====== */
+    loadBg();
+    loadBookmarks();
+})();
+</script>
+</body>
+</html>
