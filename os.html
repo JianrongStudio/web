@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyOS — 网页操作系统</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='12' height='12' rx='2' fill='%230078D4'/%3E%3Crect x='17' y='3' width='12' height='12' rx='2' fill='%2340C4FF'/%3E%3Crect x='3' y='17' width='12' height='12' rx='2' fill='%2340C4FF'/%3E%3Crect x='17' y='17' width='12' height='12' rx='2' fill='%230078D4'/%3E%3C/svg%3E">
+<style>
+/* ================= 基础与主题变量 ================= */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#0078D4;
+  --accent-2:#45A9FF;
+  --font:"Segoe UI Variable Text","Segoe UI","Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;
+  --font-disp:"Segoe UI Variable Display","Segoe UI","Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"Cascadia Code","Cascadia Mono","Consolas","Courier New",monospace;
+  --t-text:#ffffff;
+  --t-text2:rgba(255,255,255,.74);
+  --t-text3:rgba(255,255,255,.48);
+  --t-surface:rgba(30,30,33,.84);
+  --t-surface2:rgba(255,255,255,.055);
+  --t-surface3:rgba(255,255,255,.10);
+  --t-hover:rgba(255,255,255,.075);
+  --t-active:rgba(255,255,255,.13);
+  --t-border:rgba(255,255,255,.10);
+  --t-taskbar:rgba(26,26,29,.80);
+  --t-titlebar:rgba(255,255,255,.045);
+  --t-shadow:0 12px 32px rgba(0,0,0,.38), 0 2px 8px rgba(0,0,0,.24);
+  --t-soft:0 4px 16px rgba(0,0,0,.22);
+  --t-scroll:rgba(255,255,255,.35);
+  --dim:rgba(8,8,14,.26);
+}
+html.light{
+  --t-text:#1b1b1f;
+  --t-text2:rgba(0,0,0,.68);
+  --t-text3:rgba(0,0,0,.44);
+  --t-surface:rgba(250,250,252,.86);
+  --t-surface2:rgba(0,0,0,.045);
+  --t-surface3:rgba(0,0,0,.08);
+  --t-hover:rgba(0,0,0,.055);
+  --t-active:rgba(0,0,0,.10);
+  --t-border:rgba(0,0,0,.11);
+  --t-taskbar:rgba(244,244,247,.84);
+  --t-titlebar:rgba(0,0,0,.03);
+  --t-shadow:0 12px 32px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.10);
+  --t-soft:0 4px 16px rgba(0,0,0,.08);
+  --t-scroll:rgba(0,0,0,.30);
+  --dim:rgba(30,40,70,.08);
+}
+html{font-family:var(--font);font-size:14px;color:var(--t-text);-webkit-font-smoothing:antialiased}
+body{overflow:hidden;background:#000;user-select:none;height:100vh;width:100vw}
+input,textarea{font-family:var(--font);color:var(--t-text)}
+::selection{background:color-mix(in srgb,var(--accent) 55%, transparent)}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--t-scroll);border-radius:8px;border:3px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:var(--t-text3);border:3px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-track{background:transparent}
+svg{display:block}
+button{background:none;border:none;color:inherit;cursor:pointer;font-family:inherit}
+.acrylic{backdrop-filter:blur(36px) saturate(150%)}
+.acrylic-strong{backdrop-filter:blur(52px) saturate(175%)}
+body.no-acrylic .acrylic,body.no-acrylic .acrylic-strong{backdrop-filter:none}
+.noise::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.035;border-radius:inherit;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
+
+/* ================= 壁纸与桌面层 ================= */
+#wallpaper{position:fixed;inset:0;background-size:cover;background-position:center;z-index:0;transition:filter .4s}
+#wallpaper.wp-1{background-image:url('assets/wallpapers/wp-1.jpg')}
+#wallpaper.wp-2{background-image:url('assets/wallpapers/wp-2.jpg')}
+#wallpaper.wp-3{background-image:url('assets/wallpapers/wp-3.jpg')}
+#wallpaper.wp-4{background-image:url('assets/wallpapers/wp-4.jpg')}
+.wp-thumb.wp-1{background-image:url('assets/wallpapers/wp-1.jpg')}
+.wp-thumb.wp-2{background-image:url('assets/wallpapers/wp-2.jpg')}
+.wp-thumb.wp-3{background-image:url('assets/wallpapers/wp-3.jpg')}
+.wp-thumb.wp-4{background-image:url('assets/wallpapers/wp-4.jpg')}
+.g-item.wp-1{background-image:url('assets/wallpapers/wp-1.jpg')}
+.g-item.wp-2{background-image:url('assets/wallpapers/wp-2.jpg')}
+.g-item.wp-3{background-image:url('assets/wallpapers/wp-3.jpg')}
+.g-item.wp-4{background-image:url('assets/wallpapers/wp-4.jpg')}
+#wallpaperDim{position:fixed;inset:0;background:var(--dim);z-index:0}
+#nightlight{position:fixed;inset:0;z-index:1400;background:rgba(255,140,60,.14);mix-blend-mode:multiply;pointer-events:none;display:none}
+body.night #nightlight{display:block}
+
+/* ================= 开机 / 锁屏 / 登录 / 关机 ================= */
+#boot{position:fixed;inset:0;z-index:3000;background:#05060a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity .6s}
+#boot.hide{opacity:0;pointer-events:none}
+#bootLog{width:min(760px,88vw);height:min(340px,52vh);overflow:hidden;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:#9fd3ff;white-space:pre-wrap;word-break:break-all;mask-image:linear-gradient(#000 55%,transparent 100%);-webkit-mask-image:linear-gradient(#000 55%,transparent 100%)}
+#bootLogo{width:110px;height:110px;opacity:0;transform:scale(.92);transition:opacity .5s,transform .5s}
+#bootLogo.show{opacity:1;transform:scale(1)}
+#bootTitle{margin-top:10px;color:#e8f3ff;font-family:var(--font-disp);font-size:30px;font-weight:600;letter-spacing:10px;opacity:0;transition:opacity .6s}
+#bootTitle.show{opacity:1}
+
+#lock,#login{position:fixed;inset:0;z-index:2900;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+#lock{background:rgba(0,0,0,.42);backdrop-filter:blur(6px) saturate(120%)}
+#lock .l-clock{font-family:var(--font-disp);font-weight:600;font-size:92px;line-height:1;text-shadow:0 4px 24px rgba(0,0,0,.4)}
+#lock .l-date{font-size:20px;margin-top:10px;opacity:.92}
+#lock .l-avatar{margin-top:64px;width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,.6);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+#lock .l-hint{margin-top:26px;font-size:13px;opacity:.75}
+#login{background:rgba(0,0,0,.35);backdrop-filter:blur(18px) saturate(130%)}
+.login-card{width:330px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:34px 30px 30px;border-radius:12px;background:rgba(20,22,30,.45);backdrop-filter:blur(40px) saturate(160%);border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 64px rgba(0,0,0,.45)}
+.login-card .lc-avatar{width:92px;height:92px;border-radius:50%;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.login-card .lc-name{font-size:20px;font-weight:600;letter-spacing:1px}
+.login-card .lc-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:-8px}
+.login-card .lc-input{width:100%;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:6px;padding:0 12px;height:38px;margin-top:6px}
+.login-card .lc-input input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;height:100%}
+.login-card .lc-input input::placeholder{color:rgba(255,255,255,.4)}
+.login-card .lc-btn{width:100%;height:36px;border-radius:6px;background:#0078D4;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+.login-card .lc-btn:hover{background:#0a86e0}
+.login-card .lc-hint{font-size:12px;color:rgba(255,255,255,.45)}
+
+#shutdown{position:fixed;inset:0;z-index:3100;background:#05060a;color:#dfe6ee;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+#shutdown .sd-logo{width:72px;height:72px;opacity:.85}
+#shutdown .sd-text{font-size:15px;letter-spacing:2px;opacity:.8}
+#shutdown button{font-size:13px;color:#bfe3ff;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:8px 22px;display:none}
+#shutdown button:hover{background:rgba(255,255,255,.08)}
+
+/* ================= 桌面与图标 ================= */
+#desktop{position:fixed;inset:0;display:none;z-index:10}
+#desktop.on{display:block}
+#desktopIcons{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;flex-wrap:wrap;gap:2px;height:calc(100% - 72px);align-content:flex-start}
+.dicon{width:86px;padding:8px 4px 6px;border-radius:6px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--t-text);cursor:default}
+.dicon:hover{background:var(--t-hover)}
+.dicon.sel{background:var(--t-active)}
+.dicon .di-ico{width:40px;height:40px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.dicon .di-label{font-size:12px;line-height:1.25;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.55);max-width:78px}
+
+/* ================= 窗口系统 ================= */
+#windowLayer{position:absolute;inset:0 0 48px 0;overflow:hidden;z-index:100}
+.win{position:absolute;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:var(--t-surface);
+  backdrop-filter:blur(36px) saturate(150%);box-shadow:var(--t-shadow),0 0 0 1px var(--t-border);
+  min-width:340px;min-height:220px;animation:winOpen .16s cubic-bezier(.2,.7,.3,1)}
+@keyframes winOpen{from{opacity:0;transform:scale(.96) translateY(12px)}to{opacity:1;transform:none}}
+.win.max{border-radius:0}
+.win.min{display:none}
+.win-title{height:36px;flex:0 0 36px;display:flex;align-items:center;gap:9px;padding:0 6px 0 14px;background:var(--t-titlebar);cursor:default;position:relative}
+.win-title .wt-ico{width:16px;height:16px;color:var(--t-text2);flex:0 0 auto}
+.win-title .wt-text{font-size:12px;color:var(--t-text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px}
+.win-btns{display:flex;gap:2px;flex:0 0 auto}
+.win-btns button{width:46px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--t-text2)}
+.win-btns button:hover{background:var(--t-hover);color:var(--t-text)}
+.win-btns button.wb-close:hover{background:#c42b1c;color:#fff}
+.win-btns svg{width:11px;height:11px}
+.win-body{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.rz{position:absolute;z-index:40}
+.rz-n{top:-2px;left:6px;right:6px;height:6px;cursor:ns-resize}
+.rz-s{bottom:-2px;left:6px;right:6px;height:6px;cursor:ns-resize}
+.rz-e{right:-2px;top:6px;bottom:6px;width:6px;cursor:ew-resize}
+.rz-w{left:-2px;top:6px;bottom:6px;width:6px;cursor:ew-resize}
+.rz-ne{top:-2px;right:-2px;width:12px;height:12px;cursor:nesw-resize}
+.rz-nw{top:-2px;left:-2px;width:12px;height:12px;cursor:nwse-resize}
+.rz-se{bottom:-2px;right:-2px;width:12px;height:12px;cursor:nwse-resize}
+.rz-sw{bottom:-2px;left:-2px;width:12px;height:12px;cursor:nesw-resize}
+#snapPreview{position:fixed;z-index:99;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:6px;pointer-events:none;display:none}
+#snapLayout{position:fixed;z-index:1200;display:none;background:var(--t-surface);backdrop-filter:blur(40px) saturate(160%);border:1px solid var(--t-border);border-radius:8px;box-shadow:var(--t-soft);padding:10px}
+#snapLayout .sl-grid{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,30px);gap:3px}
+#snapLayout .sl-zone{border:1.5px solid var(--t-text3);border-radius:3px;cursor:pointer;background:transparent}
+#snapLayout .sl-zone:hover{background:color-mix(in srgb,var(--accent) 40%,transparent);border-color:var(--accent)}
+
+/* ================= 任务栏 ================= */
+#taskbar{position:fixed;left:0;right:0;bottom:0;height:48px;z-index:1500;display:flex;align-items:center;background:var(--t-taskbar);
+  backdrop-filter:blur(48px) saturate(170%);border-top:1px solid var(--t-border)}
+#tbCluster{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:3px;height:100%}
+.tb-btn{position:relative;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t-text)}
+.tb-btn:hover{background:var(--t-hover)}
+.tb-btn svg{width:21px;height:21px}
+.tb-btn.running::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:14px;height:3px;border-radius:2px;background:var(--t-text3);transition:.15s}
+.tb-btn.focused::after{width:26px;background:var(--t-text)}
+.tb-btn.win-act{background:var(--t-surface3)}
+#tbSearch{width:300px;max-width:26vw;height:34px;border-radius:18px;display:flex;align-items:center;gap:9px;padding:0 14px;margin-right:8px;color:var(--t-text2);font-size:13px;background:var(--t-surface2)}
+#tbSearch:hover{background:var(--t-hover)}
+#tbSearch svg{width:16px;height:16px;color:var(--t-text3)}
+#tbTray{position:absolute;right:10px;display:flex;align-items:center;gap:2px;height:100%}
+.tb-btn.small{width:36px;height:36px}
+.tb-btn.small svg{width:16px;height:16px}
+#tbClock{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:0 9px;height:100%;border-radius:8px;cursor:default}
+#tbClock:hover{background:var(--t-hover)}
+#tbClock .tc-time{font-size:12px;line-height:1.2;font-weight:500}
+#tbClock .tc-date{font-size:11px;line-height:1.2;color:var(--t-text3)}
+#tbShowDesktop{position:absolute;right:0;top:0;bottom:0;width:5px;background:transparent}
+#tbShowDesktop:hover{background:var(--t-text3)}
+
+/* ================= 开始菜单 ================= */
+#startMenu{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);width:600px;max-width:calc(100vw - 24px);height:min(660px,calc(100vh - 76px));
+  border-radius:10px;background:var(--t-surface);backdrop-filter:blur(56px) saturate(180%);box-shadow:var(--t-shadow),0 0 0 1px var(--t-border);
+  display:none;flex-direction:column;z-index:1600;overflow:hidden;animation:winOpen .18s cubic-bezier(.2,.7,.3,1)}
+#startMenu.open{display:flex}
+.sm-search{display:flex;align-items:center;gap:10px;margin:20px 24px 0;height:38px;padding:0 14px;border-radius:8px;background:var(--t-surface2);border:1px solid var(--t-border)}
+.sm-search svg{width:16px;height:16px;color:var(--t-text3)}
+.sm-search span{color:var(--t-text3);font-size:13px}
+.sm-sec{padding:18px 24px 4px;font-size:13px;color:var(--t-text2);font-weight:600;display:flex;align-items:center;gap:8px}
+.sm-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:8px 20px}
+.sm-tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px 9px;border-radius:6px;cursor:default}
+.sm-tile:hover{background:var(--t-hover)}
+.sm-tile .st-ico{width:40px;height:40px;border-radius:9px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text)}
+.sm-tile .st-ico svg{width:23px;height:23px}
+.sm-tile .st-label{font-size:11.5px;color:var(--t-text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:74px}
+.sm-rec{padding:2px 24px 6px;overflow-y:auto;flex:1}
+.sm-rec-item{display:flex;align-items:center;gap:13px;padding:9px 12px;border-radius:7px;cursor:default}
+.sm-rec-item:hover{background:var(--t-hover)}
+.sm-rec-item .ri-ico{width:34px;height:34px;border-radius:7px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text)}
+.sm-rec-item .ri-ico svg{width:18px;height:18px}
+.sm-rec-item .ri-main{flex:1;min-width:0}
+.sm-rec-item .ri-name{font-size:13px;color:var(--t-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-rec-item .ri-sub{font-size:11px;color:var(--t-text3)}
+.sm-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 24px 14px;border-top:1px solid var(--t-border)}
+.sm-user{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border-radius:8px;cursor:default}
+.sm-user:hover{background:var(--t-hover)}
+.sm-user .su-avatar{width:32px;height:32px;border-radius:50%}
+.sm-user .su-name{font-size:13px;font-weight:500}
+.sm-power{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t-text2)}
+.sm-power:hover{background:var(--t-hover);color:var(--t-text)}
+
+/* ================= 搜索面板 ================= */
+#searchOverlay{position:fixed;top:10px;left:50%;transform:translateX(-50%);width:620px;max-width:calc(100vw - 24px);z-index:1650;
+  background:var(--t-surface);backdrop-filter:blur(56px) saturate(180%);border-radius:10px;box-shadow:var(--t-shadow),0 0 0 1px var(--t-border);
+  display:none;flex-direction:column;overflow:hidden;animation:winOpen .16s cubic-bezier(.2,.7,.3,1)}
+#searchOverlay.open{display:flex}
+.so-input{display:flex;align-items:center;gap:11px;margin:18px 20px 4px;height:42px;padding:0 15px;border-radius:9px;background:var(--t-surface2);border:1px solid var(--t-border)}
+.so-input svg{width:18px;height:18px;color:var(--t-text3);flex:0 0 auto}
+.so-input input{flex:1;background:none;border:none;outline:none;font-size:15px;height:100%}
+.so-input input::placeholder{color:var(--t-text3)}
+.so-list{padding:6px 12px 14px;max-height:min(520px,calc(100vh - 160px));overflow-y:auto}
+.so-group{font-size:12px;color:var(--t-text3);padding:10px 10px 4px}
+.so-item{display:flex;align-items:center;gap:13px;padding:9px 10px;border-radius:7px;cursor:default}
+.so-item:hover{background:var(--t-hover)}
+.so-item .si-ico{width:34px;height:34px;border-radius:7px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text)}
+.so-item .si-ico svg{width:18px;height:18px}
+.so-item .si-name{font-size:13.5px;color:var(--t-text)}
+.so-item .si-sub{font-size:11.5px;color:var(--t-text3)}
+
+/* ================= 弹出面板（快捷设置/日历/通知/小组件） ================= */
+.flyout{position:fixed;right:10px;bottom:56px;z-index:1550;display:none;flex-direction:column;background:var(--t-surface);
+  backdrop-filter:blur(56px) saturate(180%);border-radius:10px;box-shadow:var(--t-shadow),0 0 0 1px var(--t-border);
+  overflow:hidden;animation:winOpen .16s cubic-bezier(.2,.7,.3,1)}
+.flyout.open{display:flex}
+#quickSettings{width:372px;padding:16px}
+.qs-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.qs-t{display:flex;flex-direction:column;gap:8px;padding:13px 12px;border-radius:8px;background:var(--t-surface2);border:1px solid var(--t-border);cursor:default;font-size:12px;color:var(--t-text2)}
+.qs-t:hover{background:var(--t-hover)}
+.qs-t.on{background:color-mix(in srgb,var(--accent) 26%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--t-text)}
+.qs-t svg{width:20px;height:20px}
+.qs-row{display:flex;align-items:center;gap:12px;margin-top:16px;font-size:13px;color:var(--t-text2)}
+.qs-row svg{width:17px;height:17px;color:var(--t-text3);flex:0 0 auto}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;background:var(--t-surface3);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--t-text);box-shadow:var(--t-soft);cursor:pointer}
+.qs-battery{margin-top:16px;padding-top:14px;border-top:1px solid var(--t-border);display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t-text2)}
+.qs-battery .qs-bbar{flex:1;height:5px;border-radius:3px;background:var(--t-surface3);overflow:hidden}
+.qs-battery .qs-bbar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+
+#calendarFlyout{width:348px}
+.cal-head{display:flex;align-items:center;gap:8px;padding:18px 20px 6px;font-size:15px;font-weight:600}
+.cal-head .ch-arrow{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--t-text2);margin-left:auto}
+.cal-head .ch-arrow:hover{background:var(--t-hover)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:8px 14px 4px}
+.cal-dow{font-size:11px;color:var(--t-text3);text-align:center;padding:5px 0}
+.cal-d{font-size:12.5px;text-align:center;padding:7px 0;border-radius:6px;cursor:default;color:var(--t-text2)}
+.cal-d:hover{background:var(--t-hover)}
+.cal-d.today{background:var(--accent);color:#fff;font-weight:600}
+.cal-d.other{color:var(--t-text3)}
+.cal-agenda{padding:6px 20px 16px}
+.cal-agenda .ca-item{display:flex;gap:12px;padding:9px 8px;border-radius:7px;font-size:12.5px;color:var(--t-text2)}
+.cal-agenda .ca-item:hover{background:var(--t-hover)}
+.cal-agenda .ca-dot{width:4px;height:4px;border-radius:50%;margin-top:6px;flex:0 0 auto}
+.cal-agenda .ca-time{color:var(--t-text3);flex:0 0 auto}
+
+#notifCenter{width:360px;max-height:min(640px,calc(100vh - 90px))}
+.nc-head{display:flex;align-items:center;padding:16px 18px 8px}
+.nc-head b{font-size:15px}
+.nc-head button{margin-left:auto;font-size:12px;color:var(--t-text3)}
+.nc-head button:hover{color:var(--t-text)}
+.nc-list{padding:4px 14px 14px;overflow-y:auto}
+.nc-item{display:flex;gap:12px;padding:12px 10px;border-radius:8px;background:var(--t-surface2);margin-bottom:8px;font-size:12.5px;color:var(--t-text2)}
+.nc-item .nc-ico{width:32px;height:32px;border-radius:7px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text);flex:0 0 auto}
+.nc-item .nc-ico svg{width:17px;height:17px}
+.nc-item .nc-t{font-size:13px;color:var(--t-text);font-weight:600;margin-bottom:2px}
+.nc-empty{padding:34px 0;text-align:center;color:var(--t-text3);font-size:13px}
+
+#widgetsPanel{position:fixed;top:12px;right:12px;width:302px;z-index:900;display:none;flex-direction:column;gap:10px;animation:winOpen .2s cubic-bezier(.2,.7,.3,1)}
+#widgetsPanel.open{display:flex}
+.wd-card{border-radius:10px;background:var(--t-surface);backdrop-filter:blur(44px) saturate(170%);box-shadow:var(--t-soft),0 0 0 1px var(--t-border);padding:14px 16px;color:var(--t-text);position:relative}
+.wd-weather .wd-wtop{display:flex;align-items:center;gap:12px}
+.wd-weather .wd-wtemp{font-family:var(--font-disp);font-size:38px;font-weight:600;line-height:1}
+.wd-weather .wd-wdesc{font-size:13px;color:var(--t-text2)}
+.wd-weather .wd-wmeta{margin-top:10px;display:flex;gap:14px;font-size:11.5px;color:var(--t-text3)}
+.wd-title{font-size:13px;font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.wd-title svg{width:15px;height:15px;color:var(--t-text3)}
+.wd-note textarea{width:100%;height:66px;resize:none;background:var(--t-surface2);border:1px solid var(--t-border);border-radius:7px;padding:8px 10px;font-size:12.5px;outline:none;color:var(--t-text)}
+.wd-note .wd-save{margin-top:7px;font-size:12px;color:var(--accent-2);display:flex;align-items:center;gap:5px}
+.wd-stat .ws-row{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--t-text2);margin-bottom:8px}
+.wd-stat .ws-bar{flex:1;height:5px;border-radius:3px;background:var(--t-surface3);overflow:hidden}
+.wd-stat .ws-bar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+.wd-stat .ws-val{font-size:11.5px;color:var(--t-text3);flex:0 0 46px;text-align:right}
+
+/* ================= 右键菜单 / 开关 / 通用控件 ================= */
+.menu{position:fixed;z-index:1700;min-width:228px;padding:5px;background:var(--t-surface);backdrop-filter:blur(44px) saturate(170%);
+  border:1px solid var(--t-border);border-radius:9px;box-shadow:var(--t-shadow);display:none}
+.menu.open{display:block;animation:winOpen .12s cubic-bezier(.2,.7,.3,1)}
+.mi{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:6px;font-size:13px;color:var(--t-text);cursor:default;white-space:nowrap}
+.mi:hover{background:var(--t-hover)}
+.mi svg{width:16px;height:16px;color:var(--t-text2);flex:0 0 auto}
+.mi.disabled{opacity:.4;pointer-events:none}
+.m-sep{height:1px;background:var(--t-border);margin:5px 9px}
+
+.switch{width:38px;height:20px;border-radius:10px;background:var(--t-surface3);position:relative;cursor:pointer;transition:.15s;flex:0 0 auto}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.15s}
+.switch.on{background:var(--accent)}
+.switch.on::after{left:20px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px;font-size:12.5px;border:1px solid var(--t-border);cursor:pointer;color:var(--t-text2)}
+.chip:hover{background:var(--t-hover)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ================= Toast ================= */
+#toasts{position:fixed;bottom:58px;right:14px;z-index:1800;display:flex;flex-direction:column;gap:8px;width:330px}
+.toast{background:var(--t-surface);backdrop-filter:blur(44px) saturate(170%);border:1px solid var(--t-border);border-radius:9px;
+  box-shadow:var(--t-soft);padding:13px 15px;display:flex;gap:12px;animation:toastIn .25s cubic-bezier(.2,.7,.3,1)}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.toast .to-ico{width:34px;height:34px;border-radius:8px;background:color-mix(in srgb,var(--accent) 30%,transparent);display:flex;align-items:center;justify-content:center;color:var(--accent-2);flex:0 0 auto}
+.toast .to-ico svg{width:18px;height:18px}
+.toast .to-t{font-size:13px;font-weight:600;margin-bottom:2px}
+.toast .to-m{font-size:12px;color:var(--t-text2);line-height:1.45}
+.toast .to-x{margin-left:auto;color:var(--t-text3);width:22px;height:22px;flex:0 0 auto;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.toast .to-x:hover{background:var(--t-hover);color:var(--t-text)}
+.toast.out{opacity:0;transform:translateX(30px);transition:.3s}
+
+/* ================= 应用通用 ================= */
+.app-toolbar{height:48px;flex:0 0 48px;display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--t-border)}
+.app-toolbar button.tb-ico{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--t-text2)}
+.app-toolbar button.tb-ico:hover{background:var(--t-hover);color:var(--t-text)}
+.app-toolbar button.tb-ico svg{width:17px;height:17px}
+.app-toolbar .tb-addr{flex:1;height:34px;display:flex;align-items:center;gap:9px;background:var(--t-surface2);border:1px solid var(--t-border);border-radius:18px;padding:0 15px;font-size:13px;color:var(--t-text2);min-width:0;cursor:text}
+.app-toolbar .tb-addr svg{width:14px;height:14px;color:var(--t-text3);flex:0 0 auto}
+.app-toolbar .tb-addr input{flex:1;background:none;border:none;outline:none;font-size:13px;min-width:0}
+.app-toolbar .tb-search{width:190px;height:32px;border-radius:16px;display:flex;align-items:center;gap:8px;background:var(--t-surface2);border:1px solid var(--t-border);padding:0 12px}
+.app-toolbar .tb-search input{flex:1;background:none;border:none;outline:none;font-size:12.5px;min-width:0}
+.app-toolbar .tb-search svg{width:14px;height:14px;color:var(--t-text3)}
+.split{display:flex;flex:1;min-height:0}
+.sidebar{width:200px;flex:0 0 200px;padding:10px 8px;border-right:1px solid var(--t-border);overflow-y:auto}
+.sb-item{display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:6px;font-size:13px;color:var(--t-text2);cursor:default;white-space:nowrap}
+.sb-item:hover{background:var(--t-hover)}
+.sb-item.on{background:var(--t-active);color:var(--t-text)}
+.sb-item svg{width:17px;height:17px;flex:0 0 auto}
+.sb-sec{font-size:11px;color:var(--t-text3);padding:12px 11px 4px;font-weight:600}
+.content{flex:1;min-width:0;overflow-y:auto;padding:14px;position:relative}
+
+/* 文件应用 */
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:4px;align-content:start}
+.fitem{display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 6px 10px;border-radius:7px;cursor:default}
+.fitem:hover{background:var(--t-hover)}
+.fitem.sel{background:var(--t-active)}
+.fitem .fi-ico{width:44px;height:44px;color:var(--t-text)}
+.fitem .fi-ico svg{width:44px;height:44px}
+.fitem .fi-name{font-size:12px;text-align:center;line-height:1.3;word-break:break-all;max-width:92px}
+.files-empty{padding:50px 0;text-align:center;color:var(--t-text3);font-size:13px}
+.files-bread{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--t-text2);white-space:nowrap;overflow:hidden}
+.files-bread .fb-item{padding:4px 9px;border-radius:6px;cursor:default;white-space:nowrap}
+.files-bread .fb-item:hover{background:var(--t-hover)}
+.files-bread .fb-arrow{color:var(--t-text3);font-size:11px}
+
+/* 终端 */
+.term{flex:1;background:rgba(10,11,15,.94);color:#dde4ec;font-family:var(--mono);font-size:13px;line-height:1.55;padding:12px 16px;overflow-y:auto;user-select:text;white-space:pre-wrap;word-break:break-all}
+.term .tp{color:#4dc3ff;font-weight:600}
+.term .tp2{color:#8be28b}
+.term .te{color:#ff7b72}
+.term .ti{color:#79c0ff}
+.term .td{color:#7a8699}
+.term .tcmd{display:flex;align-items:flex-start;gap:2px}
+.term .tcmd input{flex:1;background:none;border:none;outline:none;color:#dde4ec;font-family:var(--mono);font-size:13px;caret-color:#4dc3ff}
+.term .t-ok{color:#3fb950}
+.term .t-warn{color:#d29922}
+
+/* 设置 */
+.settings-nav{width:210px;flex:0 0 210px;padding:12px 8px;border-right:1px solid var(--t-border);overflow-y:auto}
+.st-sec{max-width:720px;margin:0 auto}
+.st-group{background:var(--t-surface2);border:1px solid var(--t-border);border-radius:9px;padding:16px 18px;margin-bottom:14px}
+.st-group h3{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.st-row{display:flex;align-items:center;gap:14px;padding:9px 0;font-size:13.5px;color:var(--t-text2)}
+.st-row .st-label{flex:1}
+.st-row .st-desc{font-size:11.5px;color:var(--t-text3);margin-top:2px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sw{width:30px;height:30px;border-radius:50%;cursor:pointer;position:relative;border:2px solid transparent}
+.sw.on{border-color:var(--t-text);box-shadow:0 0 0 2px var(--t-surface)}
+.sw input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.wp-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wp-thumb{aspect-ratio:16/9;border-radius:7px;background-size:cover;background-position:center;cursor:pointer;border:2px solid transparent;position:relative}
+.wp-thumb.on{border-color:var(--accent)}
+.wp-thumb:hover{filter:brightness(1.08)}
+.wp-thumb .wp-check{position:absolute;right:6px;bottom:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center}
+.wp-thumb.on .wp-check{display:flex}
+.about-hero{display:flex;align-items:center;gap:20px;padding:22px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%);border-radius:12px;border:1px solid var(--t-border);margin-bottom:16px}
+.about-hero .ah-logo{width:74px;height:74px}
+.about-hero .ah-name{font-family:var(--font-disp);font-size:26px;font-weight:700;letter-spacing:2px}
+.about-hero .ah-ver{color:var(--t-text3);font-size:12.5px;margin-top:4px}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.spec-card{background:var(--t-surface2);border:1px solid var(--t-border);border-radius:9px;padding:14px 16px}
+.spec-card .sc-ico{width:34px;height:34px;border-radius:8px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--accent-2);margin-bottom:9px}
+.spec-card .sc-ico svg{width:18px;height:18px}
+.spec-card .sc-label{font-size:11.5px;color:var(--t-text3);margin-bottom:3px}
+.spec-card .sc-val{font-size:14px;color:var(--t-text);font-weight:500;line-height:1.45}
+.usage-bar{height:6px;border-radius:3px;background:var(--t-surface3);overflow:hidden;margin-top:9px}
+.usage-bar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+.usage-bar i.warn{background:#f2b73c}
+
+/* 记事本 */
+.notepad-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.notepad-wrap textarea{flex:1;resize:none;border:none;outline:none;background:transparent;color:var(--t-text);font-family:var(--mono);font-size:13.5px;line-height:1.65;padding:16px 20px;user-select:text}
+
+/* 计算器 */
+.calc-wrap{flex:1;display:flex;flex-direction:column;padding:16px;gap:12px}
+.calc-display{flex:0 0 auto;text-align:right;font-family:var(--font-disp);font-size:42px;font-weight:600;padding:6px 8px 0;overflow:hidden;white-space:nowrap}
+.calc-display .cd-sub{font-size:16px;color:var(--t-text3);height:20px;overflow:hidden;white-space:nowrap}
+.calc-keys{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc-keys button{border-radius:7px;font-size:18px;font-weight:500;background:var(--t-surface2);color:var(--t-text);border:1px solid transparent;display:flex;align-items:center;justify-content:center}
+.calc-keys button:hover{background:var(--t-hover)}
+.calc-keys button:active{background:var(--t-active)}
+.calc-keys button.op{color:var(--accent-2);font-size:20px}
+.calc-keys button.fn{color:var(--t-text2);font-size:15px}
+.calc-keys button.eq{background:var(--accent);color:#fff;font-size:20px}
+.calc-keys button.eq:hover{background:var(--accent-2)}
+
+/* 浏览器 */
+.browser-toolbar{height:46px;flex:0 0 46px;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid var(--t-border)}
+.browser-toolbar .bt-addr{flex:1;height:32px;border-radius:16px;background:var(--t-surface2);border:1px solid var(--t-border);display:flex;align-items:center;gap:9px;padding:0 13px;font-size:13px;color:var(--t-text2);min-width:0}
+.browser-toolbar .bt-addr input{flex:1;background:none;border:none;outline:none;font-size:13px;min-width:0;text-align:center}
+.browser-body{flex:1;overflow-y:auto;background:var(--t-surface)}
+.browser-home{max-width:760px;margin:0 auto;padding:46px 22px}
+.browser-home h1{font-family:var(--font-disp);font-size:34px;font-weight:700;margin-bottom:6px;letter-spacing:1px}
+.browser-home .bh-sub{color:var(--t-text3);font-size:13px;margin-bottom:26px}
+.bh-search{display:flex;align-items:center;gap:11px;height:44px;background:var(--t-surface2);border:1px solid var(--t-border);border-radius:22px;padding:0 18px;margin-bottom:34px}
+.bh-search svg{width:17px;height:17px;color:var(--t-text3)}
+.bh-search input{flex:1;background:none;border:none;outline:none;font-size:14.5px}
+.bh-search button{font-size:13.5px;color:var(--accent-2);font-weight:600}
+.bh-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.bh-site{display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 6px;border-radius:10px;cursor:pointer;font-size:12.5px;color:var(--t-text2)}
+.bh-site:hover{background:var(--t-hover);color:var(--t-text)}
+.bh-site .bs-logo{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;color:#fff}
+.browser-result{padding:34px 46px;font-size:13.5px;color:var(--t-text2);line-height:1.8}
+
+/* 照片 */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.g-item{aspect-ratio:16/10;border-radius:8px;background-size:cover;background-position:center;cursor:pointer;position:relative;overflow:hidden;border:2px solid transparent}
+.g-item:hover{border-color:var(--t-surface3)}
+.g-item.on{border-color:var(--accent)}
+.g-item .g-set{position:absolute;right:8px;bottom:8px;font-size:11px;background:rgba(0,0,0,.55);color:#fff;padding:4px 9px;border-radius:14px;opacity:0;transition:.15s}
+.g-item:hover .g-set{opacity:1}
+.g-viewer{position:absolute;inset:0;background:rgba(8,8,12,.82);backdrop-filter:blur(10px);display:none;flex-direction:column;z-index:5}
+.g-viewer.on{display:flex}
+.g-viewer .gv-img{flex:1;background-size:contain;background-position:center;background-repeat:no-repeat;margin:0 20px}
+.g-viewer .gv-bar{display:flex;justify-content:center;gap:8px;padding:14px}
+.g-viewer .gv-bar button{padding:7px 16px;border-radius:6px;background:var(--t-surface3);font-size:13px}
+.g-viewer .gv-bar button:hover{background:var(--t-active)}
+
+/* 回收站 / 此电脑 */
+.trash-list{padding:8px 16px}
+.tr-item{display:flex;align-items:center;gap:13px;padding:10px 12px;border-radius:8px;cursor:default;font-size:13.5px}
+.tr-item:hover{background:var(--t-hover)}
+.tr-item .ti-ico{width:36px;height:36px;border-radius:8px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text2);flex:0 0 auto}
+.tr-item .ti-ico svg{width:19px;height:19px}
+.tr-item .ti-name{flex:1}
+.tr-item .ti-actions{display:flex;gap:6px;opacity:0}
+.tr-item:hover .ti-actions{opacity:1}
+.tr-item .ti-actions button{font-size:12px;color:var(--accent-2);padding:5px 10px;border-radius:5px}
+.tr-item .ti-actions button:hover{background:var(--t-hover)}
+.pc-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pc-card{background:var(--t-surface2);border:1px solid var(--t-border);border-radius:10px;padding:16px;cursor:pointer}
+.pc-card:hover{background:var(--t-hover)}
+.pc-card .pcc-top{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.pc-card .pcc-ico{width:40px;height:40px;border-radius:9px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text)}
+.pc-card .pcc-ico svg{width:22px;height:22px}
+.pc-card .pcc-name{font-size:14px;font-weight:600}
+.pc-card .pcc-cap{font-size:11.5px;color:var(--t-text3);margin-top:2px}
+.pc-card .pcc-use{font-size:11.5px;color:var(--t-text2);margin-top:8px;display:flex;justify-content:space-between}
+
+/* 对话框 */
+.dlg-mask{position:absolute;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:600;backdrop-filter:blur(3px)}
+.dlg-mask.on{display:flex}
+.dlg{width:360px;max-width:90%;background:var(--t-surface);backdrop-filter:blur(48px) saturate(170%);border:1px solid var(--t-border);border-radius:10px;box-shadow:var(--t-shadow);padding:22px 22px 18px}
+.dlg h4{font-size:15px;margin-bottom:8px}
+.dlg .dlg-desc{font-size:12.5px;color:var(--t-text2);line-height:1.6;margin-bottom:14px;word-break:break-all}
+.dlg .dlg-actions{display:flex;justify-content:flex-end;gap:9px}
+.dlg .dlg-actions button{padding:7px 17px;border-radius:6px;font-size:13px;background:var(--t-surface3);color:var(--t-text)}
+.dlg .dlg-actions button:hover{background:var(--t-active)}
+.dlg .dlg-actions button.primary{background:var(--accent);color:#fff}
+.dlg .dlg-actions button.primary:hover{background:var(--accent-2)}
+.dlg .dlg-actions button.danger{background:#c42b1c;color:#fff}
+
+/* 响应式 */
+@media (max-width:720px){
+  #tbSearch{width:180px}
+  #startMenu{height:min(600px,calc(100vh - 76px))}
+  .sm-grid{grid-template-columns:repeat(4,1fr)}
+  #quickSettings{width:min(372px,calc(100vw - 24px))}
+  #widgetsPanel{width:min(302px,calc(100vw - 24px))}
+  #lock .l-clock{font-size:64px}
+}
+@media (max-width:480px){
+  .sm-grid{grid-template-columns:repeat(3,1fr)}
+  #tbTray .tb-btn.small{display:none}
+  .sidebar{width:56px;flex:0 0 56px;padding:10px 4px}
+  .sb-item span{display:none}
+  .sb-item{justify-content:center}
+  .files-bread .fb-item{max-width:70px;overflow:hidden;text-overflow:ellipsis}
+  .app-toolbar .tb-search{display:none}
+}
+</style>
+</head>
+<body>
+<div id="wallpaper" class="wp-1"></div>
+<div id="wallpaperDim"></div>
+<div id="nightlight"></div>
+
+<!-- ===== 开机画面 ===== -->
+<div id="boot">
+  <pre id="bootLog"></pre>
+  <div id="bootLogo"></div>
+  <div id="bootTitle">MyOS</div>
+</div>
+
+<!-- ===== 锁屏 ===== -->
+<div id="lock">
+  <div class="l-clock" id="lockClock">--:--</div>
+  <div class="l-date" id="lockDate"></div>
+  <img id="lockAvatar" class="l-avatar" alt="avatar">
+  <div class="l-hint">点击任意位置 或 按 Enter 解锁</div>
+</div>
+
+<!-- ===== 登录 ===== -->
+<div id="login">
+  <div class="login-card">
+    <img id="loginAvatar" class="lc-avatar" alt="avatar">
+    <div class="lc-name">myos</div>
+    <div class="lc-sub">MyOS 1.0 · Linux 6.12.9</div>
+    <div class="lc-input">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <input id="loginPass" type="password" placeholder="密码（任意内容）" autocomplete="off">
+    </div>
+    <button class="lc-btn" id="loginBtn">登 录</button>
+    <div class="lc-hint">演示系统：输入任意密码或留空，点击登录</div>
+  </div>
+</div>
+
+<!-- ===== 关机画面 ===== -->
+<div id="shutdown">
+  <svg class="sd-logo" viewBox="0 0 32 32"><rect x="3" y="3" width="12" height="12" rx="2" fill="#0078D4"/><rect x="17" y="3" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="3" y="17" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="17" y="17" width="12" height="12" rx="2" fill="#0078D4"/></svg>
+  <div class="sd-text" id="sdText">正在关机…</div>
+  <button id="sdReboot">重新启动</button>
+</div>
+
+<!-- ===== 桌面 ===== -->
+<div id="desktop">
+  <div id="desktopIcons"></div>
+  <div id="windowLayer"></div>
+
+  <!-- 小组件面板 -->
+  <div id="widgetsPanel">
+    <div class="wd-card wd-weather">
+      <div class="wd-wtop">
+        <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#9fc9ff" stroke-width="1.5"><circle cx="9" cy="10" r="4.5"/><path d="M9 3.5v1.6M3.6 9H2m4.1-4.1-.9-.9M18.5 13.5a3.5 3.5 0 0 1 .4 6.98H6.4a3.9 3.9 0 1 1 1.6-7.45 5.4 5.4 0 0 1 10.5.47z"/></svg>
+        <div style="flex:1">
+          <div class="wd-wtemp">26°</div>
+          <div class="wd-wdesc">多云 · 宁波</div>
+        </div>
+      </div>
+      <div class="wd-wmeta"><span>湿度 62%</span><span>东北风 3 级</span><span>空气质量 优</span></div>
+    </div>
+    <div class="wd-card wd-note">
+      <div class="wd-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M8 8h8M8 12h5"/></svg>快速记事</div>
+      <textarea id="wdNoteText" placeholder="写点什么…"></textarea>
+      <div class="wd-save" id="wdNoteSave"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>保存到主目录</div>
+    </div>
+    <div class="wd-card wd-stat">
+      <div class="wd-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>系统状态</div>
+      <div class="ws-row"><span style="width:44px">CPU</span><div class="ws-bar"><i id="wsCpu" style="width:9%"></i></div><span class="ws-val" id="wsCpuV">9%</span></div>
+      <div class="ws-row"><span style="width:44px">内存</span><div class="ws-bar"><i id="wsMem" style="width:34%"></i></div><span class="ws-val" id="wsMemV">34%</span></div>
+      <div class="ws-row"><span style="width:44px">磁盘</span><div class="ws-bar"><i id="wsDisk" style="width:61%"></i></div><span class="ws-val" id="wsDiskV">61%</span></div>
+    </div>
+  </div>
+
+  <!-- 搜索面板 -->
+  <div id="searchOverlay" class="acrylic noise">
+    <div class="so-input">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="soInput" type="text" placeholder="搜索应用、文件或网页" autocomplete="off">
+    </div>
+    <div class="so-list" id="soList"></div>
+  </div>
+
+  <!-- 开始菜单 -->
+  <div id="startMenu" class="acrylic noise">
+    <div class="sm-search" id="smSearch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span>搜索应用、文件或网页</span>
+    </div>
+    <div class="sm-sec"><span>已固定</span></div>
+    <div class="sm-grid" id="smGrid"></div>
+    <div class="sm-sec"><span>推荐</span></div>
+    <div class="sm-rec" id="smRec"></div>
+    <div class="sm-footer">
+      <div class="sm-user" id="smUser">
+        <img class="su-avatar" id="smAvatar" alt="avatar">
+        <span class="su-name">myos 用户</span>
+      </div>
+      <button class="sm-power" id="smPower" title="电源">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v8"/><path d="M6.2 6.2a8 8 0 1 0 11.6 0"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 快捷设置 -->
+  <div id="quickSettings" class="flyout acrylic noise">
+    <div class="qs-toggles">
+      <div class="qs-t on" id="qsWifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 9a15 15 0 0 1 19 0M5.5 12.5a10.5 10.5 0 0 1 13 0M8.5 16a6 6 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.3" fill="currentColor" stroke="none"/></svg><span>Wi-Fi</span></div>
+      <div class="qs-t on" id="qsBt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 7 10 10-5 4V3l5 4L7 17"/></svg><span>蓝牙</span></div>
+      <div class="qs-t" id="qsFlight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.5 21v-5.8L3 19v-2.4l7.5-4.8V5.5a1.5 1.5 0 0 1 3 0v6.3l7.5 4.8V19l-7.5-3.8V21z"/></svg><span>飞行模式</span></div>
+      <div class="qs-t" id="qsNight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg><span>夜间模式</span></div>
+      <div class="qs-t on" id="qsBattery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7.5" width="17" height="9" rx="2"/><path d="M22 10.5v3"/><rect x="4" y="9.5" width="9" height="5" rx="1" fill="currentColor" stroke="none"/></svg><span>省电模式</span></div>
+      <div class="qs-t on" id="qsAcrylic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3.5"/><path d="M3 13c4 3 9 2 12 1s4-2 6-1"/></svg><span>亚克力</span></div>
+    </div>
+    <div class="qs-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/></svg><input type="range" id="qsVol" min="0" max="100" value="60"></div>
+    <div class="qs-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 12 17.5 6.5M12 12h5"/></svg><input type="range" id="qsBright" min="30" max="100" value="100"></div>
+    <div class="qs-battery"><span style="width:66px">电量 87%</span><div class="qs-bbar"><i style="width:87%"></i></div></div>
+  </div>
+
+  <!-- 日历 -->
+  <div id="calendarFlyout" class="flyout acrylic noise">
+    <div class="cal-head"><span id="calTitle"></span>
+      <button class="ch-arrow" id="calPrev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 6-6 6 6 6"/></svg></button>
+      <button class="ch-arrow" id="calNext"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10 6 6 6-6 6"/></svg></button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-agenda">
+      <div class="ca-item"><span class="ca-dot" style="background:#4dc3ff"></span><span class="ca-time">今天</span><span>体验 MyOS 网页操作系统</span></div>
+      <div class="ca-item"><span class="ca-dot" style="background:#f2b73c"></span><span class="ca-time">明天</span><span>给桌面换一张壁纸</span></div>
+      <div class="ca-item"><span class="ca-dot" style="background:#8be28b"></span><span class="ca-time">周六</span><span>终端里运行 neofetch</span></div>
+    </div>
+  </div>
+
+  <!-- 通知中心 -->
+  <div id="notifCenter" class="flyout acrylic noise">
+    <div class="nc-head"><b>通知</b><button id="ncClear">全部清除</button></div>
+    <div class="nc-list" id="ncList"></div>
+  </div>
+
+  <!-- 任务栏 -->
+  <div id="taskbar" class="acrylic noise">
+    <div id="tbCluster">
+      <button class="tb-btn" id="startBtn" title="开始"></button>
+      <div id="tbSearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>搜索</span>
+      </div>
+      <div id="tbRunning"></div>
+    </div>
+    <div id="tbTray">
+      <button class="tb-btn small" id="trayChevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button class="tb-btn small" id="trayWifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 9a15 15 0 0 1 19 0M5.5 12.5a10.5 10.5 0 0 1 13 0M8.5 16a6 6 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.3" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn small" id="trayVol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+      <button class="tb-btn small" id="trayBatt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7.5" width="17" height="9" rx="2"/><path d="M22 10.5v3"/><rect x="4" y="9.5" width="9" height="5" rx="1" fill="currentColor" stroke="none"/></svg></button>
+      <div id="tbClock">
+        <div class="tc-time" id="clockTime">--:--</div>
+        <div class="tc-date" id="clockDate">----/--/--</div>
+      </div>
+      <button class="tb-btn small" id="trayBell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></svg></button>
+    </div>
+    <div id="tbShowDesktop"></div>
+  </div>
+
+  <div id="snapPreview"></div>
+  <div id="snapLayout"><div class="sl-grid" id="slGrid"></div></div>
+  <div id="ctxMenu" class="menu"></div>
+  <div id="toasts"></div>
+</div>
+
+<!-- ===== 应用模板 ===== -->
+<template id="tpl-files">
+  <div class="app-toolbar">
+    <button class="tb-ico" data-fnav="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6-6 6 6 6"/></svg></button>
+    <button class="tb-ico" data-fnav="fwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m10 6 6 6-6 6"/></svg></button>
+    <button class="tb-ico" data-fnav="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V6M5 12l7-7 7 7"/></svg></button>
+    <div class="tb-addr" id="fAddr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 7.5 12 3l8.5 4.5v10.7a1.8 1.8 0 0 1-1.8 1.8H5.3a1.8 1.8 0 0 1-1.8-1.8z"/><path d="M9 20v-6.5h6V20"/></svg><div class="files-bread" id="fBread"></div></div>
+    <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="fSearch" placeholder="筛选"></div>
+  </div>
+  <div class="split">
+    <div class="sidebar" id="fSide">
+      <div class="sb-sec">位置</div>
+      <div class="sb-item on" data-side="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10.5V20h11v-9.5"/></svg><span>主目录</span></div>
+      <div class="sb-item" data-side="root"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3.5 7.5 12 3l8.5 4.5v10.7a1.8 1.8 0 0 1-1.8 1.8H5.3a1.8 1.8 0 0 1-1.8-1.8z"/><path d="M9 20v-6.5h6V20"/></svg><span>文件系统 /</span></div>
+      <div class="sb-item" data-side="etc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/></svg><span>/etc 配置</span></div>
+      <div class="sb-item" data-side="proc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>/proc 虚拟</span></div>
+      <div class="sb-sec">设备与磁盘</div>
+      <div class="sb-item" data-side="root"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 9.5h19"/></svg><span>系统盘 512 GB</span></div>
+      <div class="sb-sec">其他</div>
+      <div class="sb-item" data-side="trash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg><span>回收站</span></div>
+    </div>
+    <div class="content" id="fContent"></div>
+  </div>
+</template>
+
+<template id="tpl-terminal">
+  <div class="term" id="termOut"></div>
+  <div style="flex:0 0 auto;background:rgba(10,11,15,.94);padding:0 16px 12px">
+    <div class="tcmd"><span class="tp">myos@MyOS</span><span class="tp2">:~$</span><input id="termIn" autocomplete="off" spellcheck="false"></div>
+  </div>
+</template>
+
+<template id="tpl-settings">
+  <div class="split">
+    <div class="settings-nav" id="stNav">
+      <div class="sb-item on" data-sec="personal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg><span>个性化</span></div>
+      <div class="sb-item" data-sec="system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M9 20h6M12 16v4"/></svg><span>系统</span></div>
+      <div class="sb-item" data-sec="storage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18"/><circle cx="17.5" cy="15" r=".9" fill="currentColor"/></svg><span>存储</span></div>
+      <div class="sb-item" data-sec="apps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg><span>应用</span></div>
+    </div>
+    <div class="content st-sec" id="stContent"></div>
+  </div>
+</template>
+
+<template id="tpl-notepad">
+  <div class="app-toolbar">
+    <button class="tb-ico" data-np="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13 3v5.5H18.5"/></svg></button>
+    <button class="tb-ico" data-np="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/></svg></button>
+    <button class="tb-ico" data-np="save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h12l3 3v12.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5v-15A1.5 1.5 0 0 1 5.5 4z" opacity=".0"/><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h8V4M8 20v-6h8v6"/></svg></button>
+    <button class="tb-ico" data-np="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg></button>
+    <span style="margin-left:8px;font-size:12px;color:var(--t-text3)" id="npPath">未命名.txt</span>
+  </div>
+  <div class="notepad-wrap"><textarea id="npText" spellcheck="false" placeholder="在这里输入内容…"></textarea></div>
+</template>
+
+<template id="tpl-calc">
+  <div class="calc-wrap">
+    <div class="calc-display"><div class="cd-sub" id="cdSub"></div><div id="cdMain">0</div></div>
+    <div class="calc-keys" id="calcKeys"></div>
+  </div>
+</template>
+
+<template id="tpl-browser">
+  <div class="browser-toolbar">
+    <button class="tb-ico" id="brBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6-6 6 6 6"/></svg></button>
+    <button class="tb-ico" id="brFwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m10 6 6 6-6 6"/></svg></button>
+    <button class="tb-ico" id="brReload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg></button>
+    <button class="tb-ico" id="brHome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10.5V20h11v-9.5"/></svg></button>
+    <div class="bt-addr"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.7 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.7-4-9s1.3-6.4 4-9z"/></svg><input id="brAddr" placeholder="输入网址或搜索内容"></div>
+  </div>
+  <div class="browser-body" id="brBody"></div>
+</template>
+
+<template id="tpl-gallery">
+  <div class="app-toolbar">
+    <span style="font-size:13px;color:var(--t-text2);padding-left:6px">壁纸库 · 共 4 张</span>
+    <span style="margin-left:auto;font-size:12px;color:var(--t-text3)">点击图片可全屏预览，双击可设为壁纸</span>
+  </div>
+  <div class="content" id="galGrid"></div>
+  <div class="g-viewer" id="galViewer"><div class="gv-img" id="galViewImg"></div><div class="gv-bar"><button id="galSet">设为壁纸</button><button id="galClose">关闭</button></div></div>
+</template>
+
+<template id="tpl-trash">
+  <div class="app-toolbar">
+    <span style="font-size:13px;color:var(--t-text2);padding-left:6px" id="trCount">回收站为空</span>
+    <button class="tb-ico" id="trEmpty" title="清空回收站" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg></button>
+  </div>
+  <div class="content" id="trList"></div>
+</template>
+
+<template id="tpl-pc">
+  <div class="content">
+    <div style="font-size:17px;font-weight:600;margin-bottom:4px">此电脑</div>
+    <div style="font-size:12.5px;color:var(--t-text3);margin-bottom:18px">MyOS PC · 基于 Linux 6.12.9-myos</div>
+    <div class="pc-cards" id="pcCards"></div>
+  </div>
+</template>
+
+<template id="tpl-about">
+  <div class="content">
+    <div class="about-hero">
+      <svg class="ah-logo" viewBox="0 0 32 32"><rect x="3" y="3" width="12" height="12" rx="2" fill="#0078D4"/><rect x="17" y="3" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="3" y="17" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="17" y="17" width="12" height="12" rx="2" fill="#0078D4"/></svg>
+      <div>
+        <div class="ah-name">MyOS</div>
+        <div class="ah-ver">MyOS 1.0 · 构建 2026.09.12 · 基于 Linux 内核 6.12.9-myos</div>
+      </div>
+    </div>
+    <div class="spec-grid" id="aboutSpecs"></div>
+  </div>
+</template>
+
+<script>
+'use strict';
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+function svg(inner,extra){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"${extra||''}>${inner}</svg>`}
+function nowTime(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function nowFull(){const d=new Date();return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
+
+/* ================= 图标库 ================= */
+const IC={
+  folder:'<path d="M3.5 6.8A1.8 1.8 0 0 1 5.3 5h4.2l2 2.4h7.2a1.8 1.8 0 0 1 1.8 1.8v8.3a1.8 1.8 0 0 1-1.8 1.8H5.3a1.8 1.8 0 0 1-1.8-1.8z"/>',
+  file:'<path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13 3v5.5H18.5"/>',
+  files:'<path d="M3.5 6.8A1.8 1.8 0 0 1 5.3 5h4.2l2 2.4h7.2a1.8 1.8 0 0 1 1.8 1.8v8.3a1.8 1.8 0 0 1-1.8 1.8H5.3a1.8 1.8 0 0 1-1.8-1.8z"/><circle cx="16.8" cy="15.5" r="3"/><path d="m19.2 17.9 2 2"/>',
+  terminal:'<rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9 3.5 3-3.5 3M12.5 15h5"/>',
+  settings:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/>',
+  notepad:'<path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13 3v5.5H18.5M9 13h6M9 16.5h4"/>',
+  calc:'<rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 7.5h8M8 12h.01M12 12h.01M16 12h.01M8 15.5h.01M12 15.5h.01M16 15.5h.01M8 19h.01M12 19h.01M16 19h.01"/>',
+  browser:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.7 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.7-4-9s1.3-6.4 4-9z"/>',
+  gallery:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5 18 4.6-4.6a1.5 1.5 0 0 1 2.1 0L16 17.6M14 15.5l1.6-1.6a1.5 1.5 0 0 1 2.1 0L20 16"/>',
+  trash:'<path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/>',
+  pc:'<rect x="2.5" y="4.5" width="19" height="12.5" rx="2"/><path d="M9 20.5h6M12 17v3.5"/>',
+  home:'<path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10.5V20h11v-9.5"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3M9.5 9.5h5v5h-5z"/>',
+  mem:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M8 5v3M12 5v3M16 5v3M8 16v3M12 16v3M16 16v3M3 10h2.5M3 14h2.5M18.5 10H21M18.5 14H21"/>',
+  disk:'<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 9.5h18"/><circle cx="17.5" cy="15" r=".9"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  user:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.6-3.6 4.3-5.2 7.5-5.2s5.9 1.6 7.5 5.2"/>',
+  power:'<path d="M12 3v8"/><path d="M6.2 6.2a8 8 0 1 0 11.6 0"/>',
+  check:'<path d="m5 13 4 4L19 7"/>',
+  back:'<path d="m14 6-6 6 6 6"/>',
+  fwd:'<path d="m10 6 6 6-6 6"/>',
+  up:'<path d="M12 19V6M5 12l7-7 7 7"/>',
+  refresh:'<path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/>',
+  close:'<path d="m6 6 12 12M18 6 6 18"/>',
+  min:'<path d="M5 12h14"/>',
+  max:'<rect x="5.5" y="5.5" width="13" height="13" rx="2"/>',
+  restore:'<rect x="4" y="9" width="11" height="11" rx="2"/><path d="M9 4h8.5A1.5 1.5 0 0 1 19 5.5V14"/>',
+  wifi:'<path d="M2.5 9a15 15 0 0 1 19 0M5.5 12.5a10.5 10.5 0 0 1 13 0M8.5 16a6 6 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.3"/>',
+  vol:'<path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/>',
+  batt:'<rect x="2" y="7.5" width="17" height="9" rx="2"/><path d="M22 10.5v3"/><rect x="4" y="9.5" width="9" height="5" rx="1"/>',
+  bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/>',
+  chev:'<path d="m6 9 6 6 6-6"/>',
+  net:'<circle cx="12" cy="12" r="9"/><path d="M3.5 9h17M3.5 15h17M12 3c2.7 2.6 4 5.7 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.7-4-9s1.3-6.4 4-9z"/>',
+  save:'<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h8V4M8 20v-6h8v6"/>',
+  open:'<path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/>',
+  new:'<path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13 3v5.5H18.5"/>',
+  dl:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/>',
+  restoreItem:'<path d="M4 9v11h11V9"/><path d="M8 9V6.5A1.5 1.5 0 0 1 9.5 5h9A1.5 1.5 0 0 1 20 6.5v9a1.5 1.5 0 0 1-1.5 1.5H16"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  cloud:'<path d="M18.5 13.5a3.5 3.5 0 0 1 .4 6.98H6.4a3.9 3.9 0 1 1 1.6-7.45 5.4 5.4 0 0 1 10.5.47z"/>',
+  sun:'<circle cx="12" cy="12" r="3.6"/><path d="M12 2.8v2M12 19.2v2M2.8 12h2M19.2 12h2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M18.7 5.3l-1.5 1.5M6.8 17.2l-1.5 1.5"/>',
+  moon:'<path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/>',
+  pin:'<path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/>',
+  plane:'<path d="M10.5 21v-5.8L3 19v-2.4l7.5-4.8V5.5a1.5 1.5 0 0 1 3 0v6.3l7.5 4.8V19l-7.5-3.8V21z"/>',
+  paint:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/>',
+};
+const ICON=(name,extra)=>svg(IC[name]||IC.file,extra);
+const LOGO='<svg viewBox="0 0 32 32"><rect x="3" y="3" width="12" height="12" rx="2" fill="#0078D4"/><rect x="17" y="3" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="3" y="17" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="17" y="17" width="12" height="12" rx="2" fill="#0078D4"/></svg>';
+$('#bootLogo').innerHTML=LOGO;
+const AVATAR='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cdefs%3E%3ClinearGradient id="g" x1="0" y1="0" x2="1" y2="1"%3E%3Cstop offset="0" stop-color="%234E6EF2"/%3E%3Cstop offset="1" stop-color="%230078D4"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="64" height="64" rx="32" fill="url(%23g)"/%3E%3Ccircle cx="32" cy="25" r="11" fill="white" opacity=".92"/%3E%3Cpath d="M14 52c3-8 10-12 18-12s15 4 18 12" fill="white" opacity=".92"/%3E%3C/svg%3E';
+['#lockAvatar','#loginAvatar','#smAvatar'].forEach(s=>{const el=$(s);if(el)el.src=AVATAR});
+
+/* ================= 全局状态 ================= */
+const state={
+  theme:'dark',accent:'#0078D4',wallpaper:'wp-1',acrylic:true,night:false,
+  wifi:true,bt:true,flight:false,battSave:true,vol:60,bright:100,
+  phase:'boot',z:100,winSeq:0,wins:[],recent:[],trash:[],
+  bootAt:Date.now(),cpu:9,mem:34,
+  notifs:[
+    {icon:'info',title:'欢迎使用 MyOS',msg:'这是基于 Linux 内核风格打造的网页操作系统，尽情探索吧。',time:'刚刚'},
+    {icon:'bell',title:'提示',msg:'打开终端输入 neofetch 查看系统信息。',time:'刚刚'}
+  ],
+  pinned:[['files','文件'],['terminal','终端'],['settings','设置'],['notepad','记事本'],['calc','计算器'],['browser','浏览器'],['gallery','照片'],['trash','回收站']]
+};
+
+/* ================= 虚拟文件系统（Linux 风格） ================= */
+function D(children){return {type:'dir',children:children||{}}}
+function F(content){return {type:'file',content:String(content)}}
+const FS={
+  '/':D({
+    home:D({myos:D({
+      'readme.txt':F('欢迎使用 MyOS！\n\n这是一套运行在浏览器里的网页操作系统，模拟了 Linux 内核环境。\n\n使用建议：\n- 终端运行 neofetch 查看系统信息\n- 设置里切换壁纸 / 主题 / 强调色\n- 右键桌面试试看\n- 按 Win+L 锁定屏幕\n'),
+      'todo.txt':F('[x] 完成 MyOS 网页系统\n[ ] 体验亚克力界面\n[ ] 打开终端玩一玩\n[ ] 换一张喜欢的壁纸\n'),
+      '笔记.txt':F('MyOS 笔记\n=====\n今天创建了属于自己的操作系统。\n亚克力质感真的很美。\n'),
+      'secret.txt':F('/proc 下藏着系统的秘密。\n试试在终端运行： cat /proc/version\n'),
+      '回收站':D({})
+    })}),
+    etc:D({
+      'os-release':F('NAME="MyOS"\nVERSION="1.0 (Ningbo)"\nID=myos\nID_LIKE=debian\nPRETTY_NAME="MyOS 1.0"\nKERNEL="6.12.9-myos"\nBUILD="2026.09.12"\n'),
+      'hostname':F('myos-pc\n'),
+      'fstab':F('# <device> <mount> <type> <options>\n/dev/myroot  /        ext4  defaults  0 1\n/dev/mydata  /data    ext4  defaults  0 2\n'),
+      'myos.conf':F('# MyOS 桌面配置\ntheme=dark\naccent=#0078D4\nacrylic=on\nwallpaper=wp-1\n')
+    }),
+    usr:D({bin:D({bash:F(''),ls:F(''),grep:F(''),cat:F(''),vim:F(''),top:F('')}),share:D({wallpapers:D({'wp-1.jpg':F(''),'wp-2.jpg':F(''),'wp-3.jpg':F(''),'wp-4.jpg':F('')})})}),
+    var:D({log:D({'syslog':F('[2026-09-12 08:00:00] myos kernel: MyOS 1.0 boot complete\n[2026-09-12 08:00:02] myos-shell: acrylic compositor started\n[2026-09-12 08:00:03] myos-shell: welcome to desktop\n'),'myos-session.log':F('myos-shell[2077]: session started\nmyos-shell[2077]: wallpaper = wp-1\n')})}),
+    proc:D({
+      version:F('Linux version 6.12.9-myos (build@myos-pc) (gcc 13.2.0) #1 SMP PREEMPT_DYNAMIC MyOS 1.0'),
+      cpuinfo:F('processor\t: 0\nvendor_id\t: MyCore\nmodel name\t: MyCore X1 @ 3.60GHz\ncpu cores\t: 8\n\nprocessor\t: 1\n... (8 cores total)\n'),
+      meminfo:F('MemTotal:\t16384 MB\nMemFree:\t10123 MB\nMemAvailable:\t11806 MB\nBuffers:\t\t684 MB\nCached:\t\t3120 MB\n')
+    }),
+    opt:D({}),media:D({}),mnt:D({}),tmp:D({})
+  })
+};
+function canon(p){
+  p=String(p||'/');
+  if(p==='~')p='/home/myos';
+  const parts=[];const abs=p.startsWith('/');
+  for(const seg of p.split('/')){
+    if(!seg||seg==='.')continue;
+    if(seg==='..'){parts.pop();continue}
+    parts.push(seg);
+  }
+  return (abs?'/':'')+parts.join('/')||'/';
+}
+function getNode(p){
+  p=canon(p);
+  if(p==='/')return FS['/'];
+  let node=FS['/'];
+  for(const seg of p.split('/').filter(Boolean)){
+    if(!node||node.type!=='dir'||!(seg in node.children))return null;
+    node=node.children[seg];
+  }
+  return node;
+}
+function listDir(p){
+  const node=getNode(p);
+  if(!node||node.type!=='dir')return [];
+  return Object.keys(node.children).map(name=>({name,node:node.children[name]}))
+    .sort((a,b)=>(a.node.type===b.node.type?a.name.localeCompare(b.name,'zh'):(a.node.type==='dir'?-1:1)));
+}
+function parentOf(p){p=canon(p);if(p==='/')return '/';return canon(p.slice(0,p.lastIndexOf('/'))||'/')}
+function baseOf(p){p=canon(p);return p==='/'?'/':p.split('/').filter(Boolean).pop()}
+function dirSize(node){
+  if(node.type==='file')return Math.max(128,node.content.length*2);
+  return Object.values(node.children).reduce((s,n)=>s+dirSize(n),1024);
+}
+function fmtBytes(n){
+  if(n>=1073741824)return (n/1073741824).toFixed(1)+' GB';
+  if(n>=1048576)return (n/1048576).toFixed(1)+' MB';
+  if(n>=1024)return (n/1024).toFixed(1)+' KB';
+  return n+' B';
+}
+function scanFiles(root,prefix,q,out,depth){
+  if(depth>3)return;
+  const node=getNode(root);
+  if(!node)return;
+  for(const {name,n} of Object.entries(node.children)){
+    const path=canon(prefix+'/'+name);
+    if(n.type==='file'&&name.toLowerCase().includes(q.toLowerCase()))out.push({path,name,node:n});
+    if(n.type==='dir')scanFiles(path,path,q,out,depth+1);
+  }
+}
+
+/* ================= 通知 / 对话框 ================= */
+function toast(title,msg,icon){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<div class="to-ico">${ICON(icon||'info')}</div><div style="flex:1;min-width:0"><div class="to-t">${esc(title)}</div><div class="to-m">${esc(msg)}</div></div><button class="to-x">${ICON('close','width="11" height="11"')}</button>`;
+  $('#toasts').appendChild(t);
+  const kill=()=>{t.classList.add('out');setTimeout(()=>t.remove(),320)};
+  t.querySelector('.to-x').onclick=kill;
+  setTimeout(kill,4500);
+}
+function dialog(win,o){
+  const m=document.createElement('div');m.className='dlg-mask on';
+  m.innerHTML=`<div class="dlg"><h4>${esc(o.title)}</h4><div class="dlg-desc">${o.desc}</div><div class="dlg-actions"></div></div>`;
+  const acts=m.querySelector('.dlg-actions');
+  (o.buttons||[{label:'确定',cls:'primary'}]).forEach(b=>{
+    const btn=document.createElement('button');btn.textContent=b.label;
+    if(b.cls)btn.className=b.cls;
+    btn.onclick=()=>{m.remove();if(b.onClick)b.onClick()};
+    acts.appendChild(btn);
+  });
+  m.onclick=e=>{if(e.target===m)m.remove()};
+  win.bodyEl.appendChild(m);
+  return m;
+}
+
+/* ================= 右键菜单 ================= */
+let ctxMenuEl=null;
+function showMenu(x,y,items){
+  if(ctxMenuEl){ctxMenuEl.remove();ctxMenuEl=null}
+  const m=document.createElement('div');m.className='menu open';
+  items.forEach(it=>{
+    if(it.sep){const s=document.createElement('div');s.className='m-sep';m.appendChild(s);return}
+    const d=document.createElement('div');d.className='mi'+(it.disabled?' disabled':'');
+    d.innerHTML=(it.icon?ICON(it.icon,'width="16" height="16"')+'<span>'+esc(it.label)+'</span>':'<span style="padding-left:28px">'+esc(it.label)+'</span>');
+    d.onclick=()=>{hideMenu();if(it.action)it.action()};
+    m.appendChild(d);
+  });
+  document.body.appendChild(m);
+  const r=m.getBoundingClientRect();
+  m.style.left=Math.min(x,innerWidth-r.width-8)+'px';
+  m.style.top=Math.min(y,innerHeight-r.height-8)+'px';
+  ctxMenuEl=m;
+}
+function hideMenu(){if(ctxMenuEl){ctxMenuEl.remove();ctxMenuEl=null}}
+document.addEventListener('click',e=>{if(ctxMenuEl&&!ctxMenuEl.contains(e.target))hideMenu()});
+document.addEventListener('contextmenu',e=>{if(ctxMenuEl&&!ctxMenuEl.contains(e.target))hideMenu()});
+window.addEventListener('resize',hideMenu);
+
+/* ================= 应用注册表 ================= */
+const APPS={
+  files:{title:'文件',icon:'files',tpl:'tpl-files',init:initFiles,w:820,h:520},
+  terminal:{title:'终端',icon:'terminal',tpl:'tpl-terminal',init:initTerminal,w:700,h:440},
+  settings:{title:'设置',icon:'settings',tpl:'tpl-settings',init:initSettings,w:880,h:580},
+  notepad:{title:'记事本',icon:'notepad',tpl:'tpl-notepad',init:initNotepad,w:660,h:480},
+  calc:{title:'计算器',icon:'calc',tpl:'tpl-calc',init:initCalc,w:330,h:500,minW:280,minH:420},
+  browser:{title:'浏览器',icon:'browser',tpl:'tpl-browser',init:initBrowser,w:920,h:620},
+  gallery:{title:'照片',icon:'gallery',tpl:'tpl-gallery',init:initGallery,w:800,h:540},
+  trash:{title:'回收站',icon:'trash',tpl:'tpl-trash',init:initTrash,w:600,h:440},
+  pc:{title:'此电脑',icon:'pc',tpl:'tpl-pc',init:initPC,w:780,h:500},
+  about:{title:'关于 MyOS',icon:'info',tpl:'tpl-about',init:initAbout,w:740,h:580}
+};
+const PINNED_APPS=['files','terminal','settings','notepad','calc','browser','gallery','trash'];
+
+/* ================= 窗口管理器 ================= */
+const WA=()=>({x:0,y:0,w:innerWidth,h:innerHeight-48});
+function openApp(appId,opts){
+  const app=APPS[appId];if(!app)return;
+  hideMenu();closeFlyouts();
+  const exist=state.wins.find(w=>w.app===appId);
+  if(exist){
+    focusWin(exist);
+    if(opts&&opts.path&&exist.fs){navigateFileWin(exist,opts.path)}
+    else if(opts&&opts.navigate&&exist.fs){navigateFileWin(exist,opts.navigate)}
+    if(opts&&opts.termCmd!==undefined&&exist.term){exist.term.run(opts.termCmd)}
+    return;
+  }
+  const win={app:appId,id:++state.winSeq,min:false,max:false,prev:null,intervals:[]};
+  const el=document.createElement('div');el.className='win';
+  const cw=Math.min(app.w||760,innerWidth-20),ch=Math.min(app.h||500,innerHeight-70);
+  const off=(state.wins.length%6)*26;
+  const defX=Math.max(6,Math.round((innerWidth-cw)/2-120+off)),defY=Math.max(6,Math.round((innerHeight-48-ch)/2-40+off*.7));
+  el.style.cssText=`left:${defX}px;top:${defY}px;width:${cw}px;height:${ch}px;z-index:${++state.z}`;
+  el.innerHTML=`<div class="win-title"><span class="wt-ico">${ICON(app.icon)}</span><span class="wt-text">${esc(app.title)}</span>
+    <div class="win-btns"><button class="wb-min" title="最小化">${ICON('min')}</button><button class="wb-max" title="最大化">${ICON('max')}</button><button class="wb-close" title="关闭">${ICON('close')}</button></div></div>
+    <div class="win-body"></div>
+    <div class="rz rz-n"></div><div class="rz rz-s"></div><div class="rz rz-e"></div><div class="rz rz-w"></div>
+    <div class="rz rz-ne"></div><div class="rz rz-nw"></div><div class="rz rz-se"></div><div class="rz rz-sw"></div>`;
+  $('#windowLayer').appendChild(el);
+  win.el=el;win.bodyEl=el.querySelector('.win-body');
+  win.titleEl=el.querySelector('.win-title');win.wtText=el.querySelector('.wt-text');
+  const tpl=document.getElementById(app.tpl);
+  win.bodyEl.appendChild(tpl.content.cloneNode(true));
+  state.wins.push(win);
+  // 标题栏
+  el.querySelector('.wb-min').onclick=e=>{e.stopPropagation();minimizeWin(win)};
+  el.querySelector('.wb-max').onclick=e=>{e.stopPropagation();toggleMax(win)};
+  el.querySelector('.wb-close').onclick=e=>{e.stopPropagation();closeWin(win)};
+  el.querySelector('.wb-max').addEventListener('mouseenter',e=>{showSnapLayout(win,e)});
+  el.querySelector('.wb-max').addEventListener('mouseleave',()=>{if(!snapHover)hideSnapLayout()});
+  el.addEventListener('mousedown',()=>focusWin(win));
+  el.querySelector('.win-title').addEventListener('dblclick',e=>{if(!e.target.closest('.win-btns'))toggleMax(win)});
+  titleDrag(win);
+  ['n','s','e','w','ne','nw','se','sw'].forEach(d=>{
+    el.querySelector('.rz-'+d).addEventListener('pointerdown',e=>startResize(win,d,e));
+  });
+  if(app.init)app.init(win,win.bodyEl,opts||{});
+  pushRecent(appId,app.title);
+  renderTaskbar();renderStartRec();
+  return win;
+}
+function focusWin(win){
+  if(win.el.style.zIndex<state.z){win.el.style.zIndex=++state.z}
+  state.wins.forEach(w=>w.el.classList.remove('on'));
+  win.el.classList.add('on');
+  renderTaskbar();
+}
+function closeWin(win){
+  win.intervals.forEach(clearInterval);
+  win.el.remove();
+  state.wins=state.wins.filter(w=>w!==win);
+  if(state.wins.length)focusWin(state.wins[state.wins.length-1]);
+  renderTaskbar();
+}
+function minimizeWin(win){
+  win.min=true;win.el.classList.add('min');
+  win.el.classList.remove('on');
+  renderTaskbar();
+}
+function restoreWin(win){win.min=false;win.el.classList.remove('min');focusWin(win)}
+function toggleMax(win){
+  if(!win.max){
+    win.prev={x:parseInt(win.el.style.left),y:parseInt(win.el.style.top),w:parseInt(win.el.style.width),h:parseInt(win.el.style.height)};
+    const a=WA();
+    win.el.style.cssText=win.el.style.cssText+`;left:${a.x}px;top:${a.y}px;width:${a.w}px;height:${a.h}px`;
+    win.el.classList.add('max');
+    win.el.querySelector('.wb-max').innerHTML=ICON('restore');
+    win.max=true;
+  }else{
+    const p=win.prev;
+    win.el.style.left=p.x+'px';win.el.style.top=p.y+'px';win.el.style.width=p.w+'px';win.el.style.height=p.h+'px';
+    win.el.classList.remove('max');
+    win.el.querySelector('.wb-max').innerHTML=ICON('max');
+    win.max=false;
+  }
+  focusWin(win);
+}
+function titleDrag(win){
+  const title=win.titleEl;
+  title.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.win-btns')||win.max)return;
+    e.preventDefault();
+    const sx=e.clientX,sy=e.clientY,ox=parseInt(win.el.style.left),oy=parseInt(win.el.style.top);
+    const move=ev=>{
+      let nx=ox+ev.clientX-sx,ny=oy+ev.clientY-sy;
+      nx=Math.max(-win.el.offsetWidth+80,Math.min(innerWidth-40,nx));
+      ny=Math.max(0,Math.min(innerHeight-48-30,ny));
+      win.el.style.left=nx+'px';win.el.style.top=ny+'px';
+      showSnapZone(ev.clientX,ev.clientY);
+    };
+    const up=ev=>{
+      window.removeEventListener('pointermove',move);
+      applySnapZone(win,ev.clientX,ev.clientY);
+    };
+    window.addEventListener('pointermove',move);
+    window.addEventListener('pointerup',up,{once:true});
+  });
+}
+let snapZone=null, snapHover=false;
+function showSnapZone(x,y){
+  const z=zoneAt(x,y);
+  if(z===snapZone)return;
+  snapZone=z;
+  const pv=$('#snapPreview');
+  if(!z){pv.style.display='none';return}
+  const r=snapRect(z);
+  pv.style.display='block';
+  pv.style.left=r.x+'px';pv.style.top=r.y+'px';pv.style.width=r.w+'px';pv.style.height=r.h+'px';
+}
+function zoneAt(x,y){
+  const a=WA();
+  if(y<=4)return 'full';
+  if(x<=4)return y<a.h*0.42?'tl':(y>a.h*0.58?'bl':'left');
+  if(x>=innerWidth-4)return y<a.h*0.42?'tr':(y>a.h*0.58?'br':'right');
+  return null;
+}
+function snapRect(z){
+  const a=WA(),hw=Math.round(a.w/2),hh=Math.round(a.h/2);
+  switch(z){
+    case 'full':return a;
+    case 'left':return{x:0,y:0,w:hw,h:a.h};
+    case 'right':return{x:hw,y:0,w:a.w-hw,h:a.h};
+    case 'tl':return{x:0,y:0,w:hw,h:hh};
+    case 'tr':return{x:hw,y:0,w:a.w-hw,h:hh};
+    case 'bl':return{x:0,y:hh,w:hw,h:a.h-hh};
+    case 'br':return{x:hw,y:hh,w:a.w-hw,h:a.h-hh};
+  }
+}
+function snapToRect(win,r){
+  win.prev={x:parseInt(win.el.style.left),y:parseInt(win.el.style.top),w:parseInt(win.el.style.width),h:parseInt(win.el.style.height)};
+  if(win.max){win.el.classList.remove('max');win.el.querySelector('.wb-max').innerHTML=ICON('max');win.max=false}
+  win.el.style.left=r.x+'px';win.el.style.top=r.y+'px';win.el.style.width=r.w+'px';win.el.style.height=r.h+'px';
+}
+function applySnapZone(win,x,y){
+  const z=zoneAt(x,y);
+  $('#snapPreview').style.display='none';
+  snapZone=null;
+  if(z)snapToRect(win,snapRect(z));
+}
+function showSnapLayout(win,e){
+  const b=e.currentTarget,br=b.getBoundingClientRect();
+  const sl=$('#snapLayout');
+  sl.style.display='block';
+  sl.style.left=(br.right-110)+'px';sl.style.top=(br.top-90)+'px';
+  const grid=$('#slGrid');grid.innerHTML='';
+  ['tl','tr','bl','br','left','right'].forEach(z=>{
+    const d=document.createElement('div');d.className='sl-zone';
+    d.onclick=e=>{e.stopPropagation();snapToRect(win,snapRect(z));hideSnapLayout();snapHover=false};
+    grid.appendChild(d);
+  });
+  snapHover=true;
+}
+function hideSnapLayout(){$('#snapLayout').style.display='none'}
+function startResize(win,dir,e){
+  e.preventDefault();e.stopPropagation();
+  focusWin(win);
+  const sx=e.clientX,sy=e.clientY;
+  const r0={x:parseInt(win.el.style.left),y:parseInt(win.el.style.top),w:parseInt(win.el.style.width),h:parseInt(win.el.style.height)};
+  const minW=280,minH=180;
+  const move=ev=>{
+    const dx=ev.clientX-sx,dy=ev.clientY-sy;
+    let x=r0.x,y=r0.y,w=r0.w,h=r0.h;
+    if(dir.includes('e'))w=r0.w+dx;
+    if(dir.includes('s'))h=r0.h+dy;
+    if(dir.includes('w')){w=r0.w-dx;x=r0.x+dx}
+    if(dir.includes('n')){h=r0.h-dy;y=r0.y+dy}
+    if(w<minW){x-=minW-w;w=minW}
+    if(h<minH){y-=minH-h;h=minH}
+    win.el.style.left=x+'px';win.el.style.top=y+'px';win.el.style.width=w+'px';win.el.style.height=h+'px';
+  };
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',()=>window.removeEventListener('pointermove',move),{once:true});
+}
+function pushRecent(appId,label){
+  state.recent=state.recent.filter(r=>r.app!==appId);
+  state.recent.unshift({app:appId,label,time:Date.now()});
+  state.recent=state.recent.slice(0,6);
+}
+
+/* ================= 任务栏 ================= */
+function renderTaskbar(){
+  const wrap=$('#tbRunning');wrap.innerHTML='';
+  state.pinned.forEach(([id,label])=>{
+    const b=document.createElement('button');b.className='tb-btn';b.title=label;
+    b.innerHTML=ICON(APPS[id]?APPS[id].icon:IC.folder);
+    b.dataset.app=id;
+    wrap.appendChild(b);
+  });
+  state.wins.forEach(w=>{
+    if(PINNED_APPS.includes(w.app))return;
+    const b=document.createElement('button');b.className='tb-btn running';b.title=APPS[w.app].title;
+    b.innerHTML=ICON(APPS[w.app].icon);
+    b.dataset.app=w.app;b.dataset.win=w.id;
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll('.tb-btn').forEach(b=>{
+    const id=b.dataset.app;
+    const win=state.wins.find(w=>w.app===id);
+    if(win){
+      if(win.min)b.classList.remove('focused');
+      else if(win.el.classList.contains('on'))b.classList.add('focused');
+      b.classList.add('running');
+    }
+    b.onclick=()=>{
+      const w=state.wins.find(x=>x.app===id);
+      if(!w){openApp(id);return}
+      if(w.min)restoreWin(w);
+      else if(w.el.classList.contains('on'))minimizeWin(w);
+      else focusWin(w);
+    };
+    b.oncontextmenu=e=>{
+      e.preventDefault();
+      const w=state.wins.find(x=>x.app===id);
+      showMenu(e.clientX,e.clientY-8,[
+        {icon:w?'restoreItem':'open',label:w?'恢复窗口':'打开 '+APPS[id].title,action:()=>w?restoreWin(w):openApp(id),disabled:!w},
+        {label:'关闭窗口',action:()=>w&&closeWin(w),disabled:!w},
+        {sep:true},
+        {label:'从任务栏取消固定',action:()=>{state.pinned=state.pinned.filter(p=>p[0]!==id);renderTaskbar();renderStartGrid()},disabled:!PINNED_APPS.includes(id)}
+      ]);
+    };
+  });
+}
+function renderStartGrid(){
+  const g=$('#smGrid');g.innerHTML='';
+  const list=state.pinned.concat([['pc','此电脑'],['about','关于 MyOS']]);
+  list.forEach(([id,label])=>{
+    const d=document.createElement('div');d.className='sm-tile';
+    d.innerHTML=`<div class="st-ico">${ICON(APPS[id]?APPS[id].icon:'info')}</div><div class="st-label">${esc(label)}</div>`;
+    d.onclick=()=>{toggleStart(false);openApp(id)};
+    d.oncontextmenu=e=>{e.preventDefault();showMenu(e.clientX,e.clientY,[{label:'从开始菜单取消固定',action:()=>{state.pinned=state.pinned.filter(p=>p[0]!==id);renderStartGrid()},disabled:!PINNED_APPS.includes(id)}])};
+    g.appendChild(d);
+  });
+}
+function renderStartRec(){
+  const r=$('#smRec');r.innerHTML='';
+  state.recent.slice(0,6).forEach(rec=>{
+    const app=APPS[rec.app];if(!app)return;
+    const mins=Math.max(1,Math.round((Date.now()-rec.time)/60000));
+    const d=document.createElement('div');d.className='sm-rec-item';
+    d.innerHTML=`<div class="ri-ico">${ICON(app.icon)}</div><div class="ri-main"><div class="ri-name">${esc(rec.label)}</div><div class="ri-sub">${mins<2?'刚刚使用':mins+' 分钟前'}</div></div>`;
+    d.onclick=()=>{toggleStart(false);openApp(rec.app)};
+    r.appendChild(d);
+  });
+}
+
+/* ================= 开始菜单 / 搜索 ================= */
+function toggleStart(force){
+  const sm=$('#startMenu');
+  const open=force!==undefined?force:!sm.classList.contains('open');
+  closeFlyouts();
+  if(open){sm.classList.add('open');renderStartGrid();renderStartRec()}
+  else sm.classList.remove('open');
+}
+$('#startBtn').onclick=()=>toggleStart();
+$('#smSearch').onclick=()=>{toggleStart(false);openSearch()};
+$('#smUser').onclick=()=>{toggleStart(false);openApp('about')};
+$('#smPower').onclick=e=>{
+  e.stopPropagation();
+  showMenu(e.clientX-60,e.clientY-90,[
+    {icon:'power',label:'关机',action:()=>doShutdown(false)},
+    {icon:'refresh',label:'重新启动',action:()=>doShutdown(true)},
+    {sep:true},
+    {label:'锁定屏幕',action:()=>{toggleStart(false);doLock()}}
+  ]);
+};
+function openSearch(){
+  closeFlyouts();
+  const so=$('#searchOverlay');
+  so.classList.add('open');
+  const inp=$('#soInput');inp.value='';renderSearch('');
+  setTimeout(()=>inp.focus(),50);
+}
+function closeSearch(){$('#searchOverlay').classList.remove('open')}
+$('#tbSearch').onclick=openSearch;
+$('#soInput').addEventListener('input',e=>renderSearch(e.target.value));
+function renderSearch(q){
+  const list=$('#soList');list.innerHTML='';
+  q=q.trim();
+  const addGroup=t=>{const d=document.createElement('div');d.className='so-group';d.textContent=t;list.appendChild(d)};
+  const addItem=(icon,name,sub,action)=>{
+    const d=document.createElement('div');d.className='so-item';
+    d.innerHTML=`<div class="si-ico">${ICON(icon)}</div><div style="flex:1;min-width:0"><div class="si-name">${esc(name)}</div><div class="si-sub">${esc(sub)}</div></div>`;
+    d.onclick=()=>{closeSearch();action()};
+    list.appendChild(d);
+  };
+  if(!q){
+    addGroup('建议');
+    addItem('terminal','打开 终端','应用','')
+    list.lastChild.onclick=()=>{closeSearch();openApp('terminal')};
+    addItem('settings','打开 设置','应用');
+    list.lastChild.onclick=()=>{closeSearch();openApp('settings')};
+    addItem('files','打开 文件','应用');
+    list.lastChild.onclick=()=>{closeSearch();openApp('files')};
+    addItem('search','在网页中搜索','搜索栏');
+    list.lastChild.onclick=()=>{closeSearch();openApp('browser')};
+    return;
+  }
+  const apps=Object.keys(APPS).filter(id=>APPS[id].title.includes(q));
+  if(apps.length){addGroup('应用');apps.forEach(id=>addItem(APPS[id].icon,APPS[id].title,'应用',()=>openApp(id)))}
+  const files=[];
+  ['/home/myos','/etc','/proc','/var/log'].forEach(r=>scanFiles(r,r,q,files,0));
+  if(files.length){addGroup('文件');files.slice(0,6).forEach(f=>addItem(f.name.includes('.')?'file':'folder',f.name,f.path,()=>openTextFile(f.path)))}
+  addGroup('网页');
+  addItem('browser',`搜索网页：${q}`,'MyOS 浏览器（离线演示）',()=>openApp('browser',{query:q}));
+  if(!apps.length&&!files.length){addItem('search','未找到匹配的应用或文件','试试搜索网页',()=>{closeSearch();openApp('browser',{query:q})})}
+}
+
+/* ================= 时钟 / 日历 ================= */
+function tickClock(){
+  const d=new Date();
+  $('#clockTime').textContent=pad(d.getHours())+':'+pad(d.getMinutes());
+  $('#clockDate').textContent=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${'日一二三四五六'[d.getDay()]}`;
+  $('#lockClock').textContent=pad(d.getHours())+':'+pad(d.getMinutes());
+  $('#lockDate').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 星期${'日一二三四五六'[d.getDay()]}`;
+}
+setInterval(tickClock,1000);tickClock();
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+function renderCal(){
+  $('#calTitle').textContent=`${calYear}年 ${calMonth+1}月`;
+  const g=$('#calGrid');g.innerHTML='';
+  '日一二三四五六'.split('').forEach(d=>{const s=document.createElement('div');s.className='cal-dow';s.textContent=d;g.appendChild(s)});
+  const first=new Date(calYear,calMonth,1);
+  const start=first.getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const prevDays=new Date(calYear,calMonth,0).getDate();
+  const today=new Date();
+  for(let i=start-1;i>=0;i--){const s=document.createElement('div');s.className='cal-d other';s.textContent=prevDays-i;g.appendChild(s)}
+  for(let d=1;d<=days;d++){
+    const s=document.createElement('div');s.className='cal-d';
+    if(d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear())s.classList.add('today');
+    s.textContent=d;g.appendChild(s);
+  }
+}
+renderCal();
+$('#calPrev').onclick=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCal()};
+$('#calNext').onclick=()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCal()};
+
+/* ================= 弹出面板 ================= */
+function closeFlyouts(){
+  $$('.flyout.open,#startMenu.open,#searchOverlay.open').forEach(el=>el.classList.remove('open'));
+}
+function toggleFlyout(id){
+  const el=$(id);
+  const willOpen=!el.classList.contains('open');
+  closeFlyouts();
+  if(willOpen)el.classList.add('open');
+}
+$('#trayWifi').onclick=()=>toggleFlyout('#quickSettings');
+$('#trayVol').onclick=()=>toggleFlyout('#quickSettings');
+$('#trayBatt').onclick=()=>toggleFlyout('#quickSettings');
+$('#trayChevron').onclick=()=>toggleFlyout('#quickSettings');
+$('#trayBell').onclick=()=>toggleFlyout('#notifCenter');
+$('#tbClock').onclick=()=>toggleFlyout('#calendarFlyout');
+function bindToggle(id,get,set,label){
+  const el=$(id);
+  el.onclick=()=>{set(!get());el.classList.toggle('on');toast(label,get()?'已开启':'已关闭','check')};
+}
+bindToggle('#qsWifi',()=>state.wifi,v=>state.wifi=v,'Wi-Fi');
+bindToggle('#qsBt',()=>state.bt,v=>state.bt=v,'蓝牙');
+bindToggle('#qsFlight',()=>state.flight,v=>state.flight=v,'飞行模式');
+bindToggle('#qsBattery',()=>state.battSave,v=>state.battSave=v,'省电模式');
+$('#qsNight').onclick=()=>{
+  state.night=!state.night;
+  $('#qsNight').classList.toggle('on');
+  document.body.classList.toggle('night',state.night);
+  toast('夜间模式',state.night?'已开启':'已关闭','moon');
+};
+$('#qsAcrylic').onclick=()=>{
+  state.acrylic=!state.acrylic;
+  $('#qsAcrylic').classList.toggle('on');
+  document.body.classList.toggle('no-acrylic',!state.acrylic);
+  toast('亚克力效果',state.acrylic?'已开启':'已关闭','paint');
+};
+$('#qsVol').oninput=e=>{state.vol=e.target.value;toast('音量',state.vol+'%','vol')};
+$('#qsBright').oninput=e=>{
+  state.bright=e.target.value;
+  $('#wallpaper').style.filter=`brightness(${state.bright/100})`;
+};
+function renderNotifs(){
+  const list=$('#ncList');list.innerHTML='';
+  if(!state.notifs.length){list.innerHTML='<div class="nc-empty">没有新通知</div>';return}
+  state.notifs.forEach((n,i)=>{
+    const d=document.createElement('div');d.className='nc-item';
+    d.innerHTML=`<div class="nc-ico">${ICON(n.icon)}</div><div style="flex:1;min-width:0"><div class="nc-t">${esc(n.title)}</div><div>${esc(n.msg)}</div><div style="margin-top:3px;font-size:11px;color:var(--t-text3)">${esc(n.time)}</div></div>`;
+    list.appendChild(d);
+  });
+}
+renderNotifs();
+$('#ncClear').onclick=()=>{state.notifs=[];renderNotifs();toast('通知中心','已清除全部通知','check')};
+
+/* ================= 桌面图标 ================= */
+const DESK_ICONS=[['pc','此电脑'],['files','主目录'],['terminal','终端'],['settings','设置'],['notepad','记事本'],['calc','计算器'],['browser','浏览器'],['gallery','照片'],['trash','回收站']];
+function renderDesktopIcons(){
+  const box=$('#desktopIcons');box.innerHTML='';
+  DESK_ICONS.forEach(([id,label])=>{
+    const d=document.createElement('div');d.className='dicon';d.dataset.app=id;
+    d.innerHTML=`<div class="di-ico">${ICON(APPS[id]?APPS[id].icon:'info')}</div><div class="di-label">${esc(label)}</div>`;
+    d.onclick=e=>{
+      $$('.dicon').forEach(x=>x.classList.remove('sel'));
+      d.classList.add('sel');
+      e.stopPropagation();
+    };
+    d.ondblclick=()=>{
+      if(id==='files')openApp('files',{navigate:'/home/myos'});
+      else if(id==='pc')openApp('pc');
+      else openApp(id);
+    };
+    d.oncontextmenu=e=>{
+      e.preventDefault();
+      showMenu(e.clientX,e.clientY,[
+        {icon:'open',label:'打开',action:()=>d.ondblclick()},
+        {sep:true},
+        {label:'属性',action:()=>toast(label,'桌面快捷方式 · 双击打开 '+label,'info')}
+      ]);
+    };
+    box.appendChild(d);
+  });
+}
+$('#desktop').addEventListener('contextmenu',e=>{
+  if(e.target.closest('.win')||e.target.closest('#taskbar')||e.target.closest('.dicon')||e.target.closest('#widgetsPanel'))return;
+  e.preventDefault();
+  showMenu(e.clientX,e.clientY,[
+    {icon:'refresh',label:'刷新',action:()=>toast('桌面','已刷新','check')},
+    {sep:true},
+    {icon:'paint',label:'个性化设置',action:()=>openApp('settings',{sec:'personal'})},
+    {label:'更改壁纸',action:()=>openApp('gallery')},
+    {sep:true},
+    {icon:'terminal',label:'在终端中打开',action:()=>openApp('terminal')},
+    {icon:'info',label:'关于 MyOS',action:()=>openApp('about')}
+  ]);
+});
+$('#desktop').addEventListener('mousedown',e=>{
+  if(!e.target.closest('.dicon'))$$('.dicon').forEach(x=>x.classList.remove('sel'));
+});
+
+/* ================= 开机 / 登录 / 锁屏 ================= */
+const BOOT_LINES=[
+'[    0.000000] MyOS 1.0 (kernel 6.12.9-myos)',
+'[    0.000000] Linux version 6.12.9-myos (build@myos-pc) #1 SMP PREEMPT_DYNAMIC MyOS 1.0',
+'[    0.000000] Command line: BOOT_IMAGE=/vmlinuz-6.12.9-myos root=/dev/myroot ro quiet splash',
+'[    0.012348] CPU: 8 x MyCore X1 @ 3.60GHz (8 threads)',
+'[    0.012401] Memory: 16384MB available',
+'[    0.045112] ACPI: MyOS ACPI tables loaded',
+'[    0.078930] PCI: probing hardware... OK',
+'[    0.121004] mygpu: MyGPU X1 Acrylic 8GB initialized',
+'[    0.153470] nvme0n1: 512GB MyData SSD',
+'[    0.201881] EXT4-fs (sda1): mounted filesystem with ordered data mode',
+'[    0.230215] systemd[1]: Starting MyOS 1.0...',
+'[    0.261984] systemd[1]: Reached target Local File Systems',
+'[    0.302771] systemd[1]: Starting Network Manager...',
+'[    0.341235] myos-net: wlan0 connected to MyOS_5G (172.1 KB/s)',
+'[    0.388290] systemd[1]: Reached target Network',
+'[    0.412846] myos-shell[2077]: Starting Wayland compositor (acrylic)',
+'[    0.450213] myos-shell[2077]: Acrylic blur engine: enabled',
+'[    0.498877] myos-shell[2077]: Loading desktop environment...',
+'[    0.531402] myos-session[2048]: Session myos@myos-pc started',
+'[    0.574955] systemd[1]: Reached target Graphical Interface',
+'[  OK  ] Reached target Graphical Interface.',
+'[  OK  ] MyOS Desktop Environment is ready.',
+''
+];
+function doBoot(){
+  const log=$('#bootLog');log.textContent='';
+  let i=0;
+  const timer=setInterval(()=>{
+    if(i<BOOT_LINES.length){
+      log.textContent+=BOOT_LINES[i]+'\n';
+      log.scrollTop=log.scrollHeight;
+      i++;
+    }else{
+      clearInterval(timer);
+      $('#bootLogo').classList.add('show');
+      $('#bootTitle').classList.add('show');
+      setTimeout(()=>{
+        $('#boot').classList.add('hide');
+        setTimeout(showLogin,600);
+      },900);
+    }
+  },Math.random()<0.4?30:95);
+  $('#boot').onclick=()=>{
+    clearInterval(timer);
+    $('#boot').classList.add('hide');
+    setTimeout(showLogin,500);
+  };
+}
+function showLogin(){
+  state.phase='login';
+  $('#login').style.display='flex';
+  setTimeout(()=>$('#loginPass').focus(),80);
+}
+function doLogin(){
+  state.phase='desktop';
+  $('#login').style.display='none';
+  $('#desktop').classList.add('on');
+  $('#widgetsPanel').classList.add('open');
+  renderDesktopIcons();renderTaskbar();
+  state.bootAt=Date.now();
+  setTimeout(()=>toast('欢迎使用 MyOS','输入任意密码即可登录，尽情探索。','check'),600);
+}
+$('#loginBtn').onclick=doLogin;
+$('#loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+function doLock(){
+  state.phase='lock';
+  closeFlyouts();toggleStart(false);closeSearch();
+  $$('.dicon').forEach(x=>x.classList.remove('sel'));
+  state.wins.forEach(w=>minimizeWin(w));
+  $('#lock').style.display='flex';
+  tickClock();
+}
+$('#lock').onclick=()=>{$('#lock').style.display='none';showLogin()};
+$('#lock').addEventListener('keydown',e=>{$('#lock').style.display='none';showLogin()});
+function doShutdown(reboot){
+  state.phase='shutdown';
+  closeFlyouts();toggleStart(false);
+  $('#desktop').classList.remove('on');
+  $('#shutdown').style.display='flex';
+  $('#sdText').textContent=reboot?'正在重新启动…':'正在关机…';
+  $('#sdReboot').style.display='none';
+  setTimeout(()=>{
+    if(reboot){location.reload();return}
+    $('#sdText').textContent='系统已关闭，可以安全地关闭电源了';
+    $('#sdReboot').style.display='inline-flex';
+  },1600);
+}
+$('#sdReboot').onclick=()=>location.reload();
+
+/* ================= 键盘快捷键 ================= */
+document.addEventListener('keydown',e=>{
+  if(state.phase!=='desktop'&&state.phase!=='lock')return;
+  if(e.key==='Escape'){
+    if(ctxMenuEl){hideMenu();return}
+    if($('#searchOverlay').classList.contains('open')){closeSearch();return}
+    if($('#startMenu').classList.contains('open')){toggleStart(false);return}
+    $$('.flyout.open').forEach(el=>el.classList.remove('open'));
+    hideSnapLayout();
+    return;
+  }
+  if(e.key==='Meta'||e.key==='Windows'){e.preventDefault();toggleStart()}
+  if(state.phase==='lock'&&e.key!=='Meta'&&e.key!=='Windows'){if(e.key==='Enter'||e.key===' '){$('#lock').style.display='none';showLogin()}}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='l'&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(state.phase==='desktop')doLock()}
+});
+
+/* ================= 其他静态绑定 ================= */
+$('#tbShowDesktop').addEventListener('mouseenter',()=>{state.wins.forEach(w=>{if(!w.min)minimizeWin(w)})});
+$('#tbShowDesktop').addEventListener('mouseleave',()=>{});
+document.getElementById('tbClock');
+$('#taskbar').addEventListener('contextmenu',e=>{
+  if(e.target.closest('.tb-btn'))return;
+  e.preventDefault();
+  showMenu(e.clientX,e.clientY,[
+    {icon:'paint',label:'任务栏设置',action:()=>openApp('settings',{sec:'personal'})},
+    {label:'关闭所有窗口',action:()=>{state.wins.slice().forEach(closeWin)}}
+  ]);
+});
+/* 小组件 */
+$('#wdNoteSave').onclick=()=>{
+  const v=$('#wdNoteText').value;
+  getNode('/home/myos').children['快速笔记.txt']=F(v||'（空）');
+  toast('快速记事','已保存到 /home/myos/快速笔记.txt','check');
+};
+function tickStats(){
+  state.cpu=Math.max(3,Math.min(88,state.cpu+Math.round(Math.random()*14-7)));
+  state.mem=Math.max(22,Math.min(82,state.mem+Math.round(Math.random()*6-3)));
+  $('#wsCpu').style.width=state.cpu+'%';$('#wsCpuV').textContent=state.cpu+'%';
+  $('#wsMem').style.width=state.mem+'%';$('#wsMemV').textContent=state.mem+'%';
+}
+setInterval(tickStats,2200);
+/* 小组件面板开关（通知中心底部隐藏入口：右键时钟区域不做，用 Win+W 风格按钮省略） */
+
+/* ================= 全局桥接 ================= */
+window.openTextFile=function(path){openApp('notepad',{path})};
+window.navigateFileWin=function(w,path){if(w&&w.fs&&w.fs.go)w.fs.go(path)};
+
+/* ================= 文件应用 ================= */
+function initFiles(win,body,opts){
+  win.fs={path:'/home/myos',hist:['/home/myos'],hi:0};
+  const side=body.querySelector('#fSide'),content=body.querySelector('#fContent');
+  const bread=body.querySelector('#fBread'),search=body.querySelector('#fSearch');
+  body.querySelectorAll('[data-fnav]').forEach(b=>{
+    b.onclick=()=>{
+      const a=b.dataset.fnav;
+      if(a==='back')fsNav(win,-1);else if(a==='fwd')fsNav(win,1);else fsGo(win,parentOf(win.fs.path));
+    };
+  });
+  side.querySelectorAll('.sb-item').forEach(s=>{
+    s.onclick=()=>{
+      side.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('on'));
+      s.classList.add('on');
+      if(s.dataset.side==='trash'){openApp('trash');return}
+      fsGo(win,({home:'/home/myos',root:'/',etc:'/etc',proc:'/proc'})[s.dataset.side]||'/home/myos');
+    };
+  });
+  search.addEventListener('input',()=>fsRender(win));
+  win.fs.go=p=>{
+    win.fs.hist=win.fs.hist.slice(0,win.fs.hi+1);
+    win.fs.hist.push(p);win.fs.hi=win.fs.hist.length-1;
+    fsRender(win);
+  };
+  function fsNav(win,d){
+    const h=win.fs.hi+d;
+    if(h<0||h>=win.fs.hist.length)return;
+    win.fs.hi=h;win.fs.path=win.fs.hist[h];fsRender(win);
+  }
+  if(opts&&(opts.path||opts.navigate))win.fs.path=opts.path||opts.navigate;
+  fsRender(win);
+
+  function fsRender(win){
+    const p=canon(win.fs.path);
+    const items=listDir(p);
+    const q=search.value.trim().toLowerCase();
+    const shown=q?items.filter(i=>i.name.toLowerCase().includes(q)):items;
+    side.querySelectorAll('.sb-item').forEach(s=>{
+      const map={home:'/home/myos',root:'/',etc:'/etc',proc:'/proc'};
+      s.classList.toggle('on',map[s.dataset.side]===p||(s.dataset.side==='home'&&p.startsWith('/home/myos')));
+    });
+    bread.innerHTML='';
+    const segs=p.split('/').filter(Boolean);
+    const addCrumb=(label,path,last)=>{
+      const d=document.createElement('span');d.className='fb-item';d.textContent=label;
+      if(last)d.style.color='var(--t-text)';
+      d.onclick=()=>fsGo(win,path);
+      bread.appendChild(d);
+      if(!last){const a=document.createElement('span');a.className='fb-arrow';a.textContent='›';bread.appendChild(a)}
+    };
+    addCrumb('文件系统','/',!segs.length);
+    let cur='';
+    segs.forEach((s,i)=>{
+      cur+='/'+s;
+      addCrumb(s,cur,i===segs.length-1);
+    });
+    content.innerHTML='';
+    if(!shown.length){content.innerHTML='<div class="files-empty">此文件夹为空</div>';return}
+    const grid=document.createElement('div');grid.className='files-grid';
+    shown.forEach(({name,node})=>{
+      const isDir=node.type==='dir';
+      const d=document.createElement('div');d.className='fitem';
+      const ico=isDir?'<span style="color:var(--accent-2)">'+ICON('folder','width="44" height="44"')+'</span>':'<span style="color:var(--t-text2)">'+ICON('file','width="44" height="44"')+'</span>';
+      d.innerHTML=`<div class="fi-ico">${ico}</div><div class="fi-name">${esc(name)}</div>`;
+      d.onclick=e=>{
+        content.querySelectorAll('.fitem').forEach(x=>x.classList.remove('sel'));
+        d.classList.add('sel');win.fs.sel=name;e.stopPropagation();
+      };
+      d.ondblclick=()=>{
+        const full=canon(p+'/'+name);
+        if(isDir)fsGo(win,full);
+        else openTextFile(full);
+      };
+      d.oncontextmenu=e=>{
+        e.preventDefault();
+        const full=canon(p+'/'+name);
+        showMenu(e.clientX,e.clientY,[
+          {icon:isDir?'folder':'open',label:'打开',action:()=>{if(isDir)fsGo(win,full);else openTextFile(full)}},
+          {sep:true},
+          {label:'复制路径',action:()=>{if(navigator.clipboard)navigator.clipboard.writeText(full);toast('已复制',full,'check')}},
+          {icon:'trash',label:'删除（移入回收站）',action:()=>deleteToTrash(full,name,node)},
+          {sep:true},
+          {label:'属性',action:()=>{const size=fmtBytes(dirSize(node));dialog(win,{title:name,desc:'类型：'+(isDir?'文件夹':'文本文件')+'\n路径：'+full+'\n大小：'+size+'\n权限：-rw-r--r-- root root',buttons:[{label:'确定'}]})}}
+        ]);
+      };
+      grid.appendChild(d);
+    });
+    content.appendChild(grid);
+  }
+  function deleteToTrash(full,name,node){
+    const parent=getNode(parentOf(full));
+    if(!parent||!(name in parent.children))return;
+    delete parent.children[name];
+    state.trash.push({path:full,name,node,at:Date.now()});
+    fsRender(win);
+    toast('已删除','“'+name+'”已移入回收站','trash');
+  }
+}
+
+/* ================= 终端 ================= */
+function initTerminal(win,body,opts){
+  const out=body.querySelector('#termOut'),input=body.querySelector('#termIn');
+  win.term={cwd:'/home/myos',hist:[],hi:-1,run:cmd=>runCmd(win,cmd)};
+  const p=()=>win.term.cwd.replace('/home/myos','~')||'~';
+  print('<span class="ti">MyOS Terminal</span> · Linux 6.12.9-myos · 输入 <span class="t-ok">help</span> 查看命令');
+  print('');
+  function print(html){const d=document.createElement('div');d.innerHTML=html;out.appendChild(d);out.scrollTop=out.scrollHeight}
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      const cmd=input.value.trim();
+      print(`<span class="tp">myos@MyOS</span><span class="tp2">:${esc(p())}$ </span><span>${esc(cmd)}</span>`);
+      if(cmd)win.term.hist.push(cmd);
+      win.term.hi=win.term.hist.length;
+      runCmd(win,cmd);
+      input.value='';
+    }else if(e.key==='ArrowUp'){
+      e.preventDefault();
+      if(win.term.hi>0){win.term.hi--;input.value=win.term.hist[win.term.hi]||''}
+    }else if(e.key==='ArrowDown'){
+      e.preventDefault();
+      if(win.term.hi<win.term.hist.length-1){win.term.hi++;input.value=win.term.hist[win.term.hi]||''}
+      else{win.term.hi=win.term.hist.length;input.value=''}
+    }
+  });
+  setTimeout(()=>input.focus(),80);
+  function runCmd(win,raw){
+    const t=win.term;
+    if(!raw)return;
+    const parts=raw.trim().split(/\s+/);
+    const cmd=parts[0];
+    const resolve=p=>{
+      if(!p)return t.cwd;
+      if(p==='~')return '/home/myos';
+      if(p.startsWith('~/'))return '/home/myos'+p.slice(1);
+      return canon(p.startsWith('/')?p:t.cwd+'/'+p);
+    };
+    switch(cmd){
+      case 'help':print(`<span class="t-ok">可用命令：</span> help clear ls cd pwd cat echo whoami date uname neofetch
+  df free ps history open touch mkdir rm theme wallpaper ping sudo apt vi
+  <span class="td">更多：</span> reboot shutdown exit`);break;
+      case 'clear':out.innerHTML='';break;
+      case 'pwd':print(t.cwd);break;
+      case 'whoami':print('myos');break;
+      case 'date':print(nowFull());break;
+      case 'echo':{
+        const rest=raw.slice(4).trim();
+        const m=rest.match(/^(.*?)\s*>\s*(\S+)$/);
+        if(m){const f=resolve(m[2]);const n=getNode(f);if(!n||n.type!=='file'){print('<span class="te">bash: '+esc(m[2])+': 无法写入</span>');break}
+          n.content=m[1]+'\n';print('')}
+        else print(rest);
+        break;
+      }
+      case 'uname':print('MyOS myos-pc 6.12.9-myos #1 SMP PREEMPT_DYNAMIC x86_64 MyOS GNU/Linux');break;
+      case 'ls':{
+        const target=parts[1]&&!parts[1].startsWith('-')?resolve(parts[1]):t.cwd;
+        const long=parts.includes('-la')||parts.includes('-l')||parts.includes('-a');
+        const items=listDir(target);
+        if(long){
+          items.forEach(({name,node})=>{
+            const isD=node.type==='dir';
+            print(`<span class="td">${isD?'drwxr-xr-x':'-rw-r--r--'} 1 root root ${fmtBytes(dirSize(node)).padStart(10)}</span> ${isD?'<span class="tp2">'+esc(name)+'</span>':esc(name)}${isD?'/':''}`);
+          });
+        }else{
+          const line=items.map(({name,node})=>node.type==='dir'?'<span class="tp2">'+esc(name)+'</span>/':esc(name)).join('&nbsp;&nbsp;');
+          print(line||'<span class="td">（空）</span>');
+        }
+        break;
+      }
+      case 'cd':{
+        if(!parts[1]){t.cwd='/home/myos';break}
+        const target=resolve(parts[1]);
+        const n=getNode(target);
+        if(!n||n.type!=='dir'){print('<span class="te">bash: cd: '+esc(parts[1])+': 没有那个目录</span>');break}
+        t.cwd=target;break;
+      }
+      case 'cat':{
+        if(!parts[1]){print('<span class="te">用法: cat &lt;文件&gt;</span>');break}
+        const f=resolve(parts[1]);
+        const n=getNode(f);
+        if(!n){print('<span class="te">cat: '+esc(parts[1])+': 没有那个文件</span>');break}
+        if(n.type==='dir'){print('<span class="te">cat: '+esc(parts[1])+': 是一个目录</span>');break}
+        print(esc(n.content));break;
+      }
+      case 'neofetch':{
+        const up=Math.floor((Date.now()-state.bootAt)/1000);
+        const hh=Math.floor(up/3600),mm=Math.floor(up%3600/60),ss=up%60;
+        const logo=[
+'<span class="tp">        .--.</span>',
+'<span class="tp">       |o_o |</span>',
+'<span class="tp">       |:_/ |</span>',
+'<span class="tp">      //   \\ \\</span>',
+'<span class="tp">     (|     | )</span>',
+'<span class="tp">    /\'\\_   _/\`\\</span>',
+'<span class="tp">    \\___)=(___/</span>'
+        ].join('\n');
+        print(logo);
+        print('<span class="t-ok">myos@MyOS</span><span class="td"> -----------------------</span>');
+        [['OS','MyOS 1.0 x86_64'],['Kernel','Linux 6.12.9-myos'],['Uptime',hh+' hours, '+mm+' mins, '+ss+' secs'],['Shell','mysh 1.0'],['Resolution',innerWidth+'x'+innerHeight],['DE','MyOS Desktop (Acrylic)'],['Theme',state.theme==='dark'?'Dark':'Light'],['CPU','MyCore X1 (8) @ 3.60GHz'],['Memory','16384MB']].forEach(([k,v])=>{
+          print(`<span class="tp2">${k.padEnd(12)}</span> <span class="ti">${v}</span>`);
+        });
+        break;
+      }
+      case 'df':print('<span class="td">文件系统  容量  已用  可用  使用% 挂载点</span>\n/dev/myroot  512G  313G  199G  61%  /\n/dev/mydata  256G  58G  198G  23%  /home');break;
+      case 'free':print('              总计       已用       可用\n内存:       16384 MB   5618 MB   10766 MB\n交换:        4096 MB      0 MB    4096 MB');break;
+      case 'ps':print('  PID TTY      TIME CMD\n    1 ?        0:01 systemd\n 2077 ?        0:02 myos-shell\n 2048 ?        0:01 myos-session\n 3001 tty1     0:00 mysh');break;
+      case 'history':t.hist.forEach((h,i)=>print(' '+(i+1)+'  '+esc(h)));break;
+      case 'open':{if(parts[1])openTextFile(resolve(parts[1]));else print('<span class="te">用法: open &lt;文件&gt;</span>');break}
+      case 'touch':{
+        if(!parts[1]){print('<span class="te">用法: touch &lt;文件&gt;</span>');break}
+        const f=resolve(parts[1]);
+        const par=getNode(parentOf(f));
+        if(!par){print('<span class="te">touch: 目录不存在</span>');break}
+        par.children[baseOf(f)]=F('');print('');break;
+      }
+      case 'mkdir':{
+        if(!parts[1]){print('<span class="te">用法: mkdir &lt;目录&gt;</span>');break}
+        const f=resolve(parts[1]);
+        const par=getNode(parentOf(f));
+        if(!par){print('<span class="te">mkdir: 目录不存在</span>');break}
+        par.children[baseOf(f)]=D({});print('');break;
+      }
+      case 'rm':{
+        if(!parts[1]){print('<span class="te">用法: rm &lt;文件&gt;</span>');break}
+        const f=resolve(parts[1]);
+        const name=baseOf(f),par=getNode(parentOf(f));
+        if(par&&name in par.children){
+          const node=par.children[name];
+          delete par.children[name];
+          state.trash.push({path:f,name,node,at:Date.now()});
+          print('<span class="t-warn">已移入回收站：'+esc(f)+'</span>');
+        }else print('<span class="te">rm: 没有那个文件</span>');
+        break;
+      }
+      case 'theme':{
+        const v=parts[1];
+        if(v==='dark'||v==='light'){setTheme(v);print('<span class="t-ok">主题已切换为 '+v+'</span>')}
+        else print('<span class="td">用法: theme &lt;dark|light&gt;  ·  当前: '+state.theme+'</span>');
+        break;
+      }
+      case 'wallpaper':{
+        const v=parts[1];
+        if(v==='list'){print('<span class="td">可用壁纸: 1 Bloom深色  2 Bloom浅色  3 极光  4 波浪\n当前: '+state.wallpaper+'</span>');break}
+        const n=parseInt(v);
+        if(n>=1&&n<=4){setWallpaper('wp-'+n);print('<span class="t-ok">壁纸已切换为 wp-'+n+'</span>')}
+        else print('<span class="td">用法: wallpaper &lt;1-4&gt; 或 wallpaper list</span>');
+        break;
+      }
+      case 'ping':{
+        const host=parts[1]||'myos.local';
+        print('PING '+esc(host)+' (10.0.0.'+(Math.floor(Math.random()*200)+10)+') 56(84) bytes of data.');
+        let n=0;
+        const iv=setInterval(()=>{
+          if(n>=4){clearInterval(iv);print('--- '+esc(host)+' ping statistics ---\n4 packets transmitted, 4 received, 0% packet loss, time 3005ms');return}
+          n++;
+          print('64 bytes from '+esc(host)+': icmp_seq='+n+' ttl=64 time='+(Math.random()*8+4).toFixed(2)+' ms');
+        },380);
+        win.intervals.push(iv);
+        break;
+      }
+      case 'sudo':print('<span class="te">myos 不在 sudoers 文件中。\n此事将被记录并上报。</span>');break;
+      case 'apt':print('<span class="t-warn">apt: 模拟环境中的软件包管理器\n提示：试试 apt install <span class="td">多巴胺</span>？</span>');break;
+      case 'vi':case 'vim':case 'nano':print('<span class="t-warn">你已进入 vim。\n你出不来了。\n按 Esc 无效，输入 :q! 也没用。\n建议直接关闭这个窗口，重新开始人生。</span>');break;
+      case 'exit':closeWin(win);break;
+      case 'reboot':doShutdown(true);break;
+      case 'shutdown':doShutdown(false);break;
+      default:print('<span class="te">mysh: 未找到命令：'+esc(cmd)+'</span>\n输入 <span class="t-ok">help</span> 查看可用命令');
+    }
+  }
+}
+
+/* ================= 设置 ================= */
+const SWATCHES=[['#0078D4','蓝'],['#00B294','青'],['#107C10','绿'],['#8764B8','紫'],['#E3008C','粉'],['#CA5010','橙']];
+function initSettings(win,body,opts){
+  const nav=body.querySelector('#stNav'),content=body.querySelector('#stContent');
+  nav.querySelectorAll('.sb-item').forEach(s=>s.onclick=()=>showSec(s.dataset.sec));
+  function showSec(sec){
+    nav.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('on',x.dataset.sec===sec));
+    renderSec(sec);
+  }
+  function renderSec(sec){
+    if(sec==='personal'){
+      content.innerHTML=`
+      <div class="st-group"><h3>主题</h3><div class="st-row"><span class="st-label">选择外观模式<div class="st-desc">深色模式更护眼，浅色模式更通透</div></span>
+        <div style="display:flex;gap:8px">
+          <span class="chip ${state.theme==='dark'?'on':''}" id="thDark">深色</span>
+          <span class="chip ${state.theme==='light'?'on':''}" id="thLight">浅色</span>
+        </div></div></div>
+      <div class="st-group"><h3>强调色</h3><div class="st-row"><span class="st-label">为按钮、高亮与亚克力光效着色</span>
+        <div class="swatches" id="swList"></div></div></div>
+      <div class="st-group"><h3>壁纸</h3><div style="display:block"><span class="st-label">选择桌面壁纸<div class="st-desc">点击即应用，照片应用内可全屏预览</div></span>
+        <div class="wp-thumbs" id="wpList" style="margin-top:10px"></div></div></div>
+      <div class="st-group"><h3>效果</h3>
+        <div class="st-row"><span class="st-label">亚克力模糊<div class="st-desc">为任务栏、窗口与菜单添加毛玻璃质感</div></span><div class="switch on" id="swAcr"></div></div>
+        <div class="st-row"><span class="st-label">夜间模式<div class="st-desc">降低屏幕色温，夜间更舒适</div></span><div class="switch ${state.night?'on':''}" id="swNight"></div></div>
+      </div>`;
+      const sw=$('#swList');
+      SWATCHES.forEach(([c,n])=>{
+        const d=document.createElement('div');d.className='sw'+(state.accent===c?' on':'');
+        d.style.background=c;d.title=n;
+        d.onclick=()=>{setAccent(c);sw.querySelectorAll('.sw').forEach(x=>x.classList.remove('on'));d.classList.add('on')};
+        sw.appendChild(d);
+      });
+      const custom=document.createElement('div');custom.className='sw';
+      custom.style.background='conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)';
+      custom.title='自定义';
+      custom.innerHTML='<input type="color" id="swCustom" value="'+state.accent+'">';
+      custom.querySelector('input').oninput=e=>setAccent(e.target.value);
+      sw.appendChild(custom);
+      $('#thDark').onclick=()=>setTheme('dark');
+      $('#thLight').onclick=()=>setTheme('light');
+      const wp=$('#wpList');
+      for(let i=1;i<=4;i++){
+        const d=document.createElement('div');d.className='wp-thumb wp-'+i+(state.wallpaper==='wp-'+i?' on':'');
+        d.innerHTML='<div class="wp-check">'+ICON('check','width="11" height="11"')+'</div>';
+        d.onclick=()=>{setWallpaper('wp-'+i);wp.querySelectorAll('.wp-thumb').forEach(x=>x.classList.remove('on'));d.classList.add('on')};
+        wp.appendChild(d);
+      }
+      const acr=$('#swAcr');acr.classList.toggle('on',state.acrylic);
+      acr.onclick=()=>{state.acrylic=!state.acrylic;acr.classList.toggle('on');document.body.classList.toggle('no-acrylic',!state.acrylic);toast('亚克力效果',state.acrylic?'已开启':'已关闭','paint')};
+      const ngt=$('#swNight');ngt.classList.toggle('on',state.night);
+      ngt.onclick=()=>{state.night=!state.night;ngt.classList.toggle('on');document.body.classList.toggle('night',state.night);toast('夜间模式',state.night?'已开启':'已关闭','moon')};
+    }else if(sec==='system'){
+      content.innerHTML=`
+      <div class="about-hero"><svg class="ah-logo" viewBox="0 0 32 32"><rect x="3" y="3" width="12" height="12" rx="2" fill="#0078D4"/><rect x="17" y="3" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="3" y="17" width="12" height="12" rx="2" fill="#40C4FF"/><rect x="17" y="17" width="12" height="12" rx="2" fill="#0078D4"/></svg>
+        <div><div class="ah-name">MyOS</div><div class="ah-ver">MyOS 1.0 · 构建 2026.09.12 · 基于 Linux 内核 6.12.9-myos</div></div></div>
+      <div class="spec-grid" id="sysSpecs"></div>
+      <div class="st-group" style="margin-top:14px"><h3>系统操作</h3>
+        <div class="st-row"><span class="st-label">重新启动系统<div class="st-desc">重新播放开机动画</div></span><button class="chip" id="sysReboot">重新启动</button></div>
+        <div class="st-row"><span class="st-label">打开关于页<div class="st-desc">查看系统详细信息</div></span><button class="chip" id="sysAbout">关于 MyOS</button></div>
+      </div>`;
+      renderSpecs($('#sysSpecs'),win);
+      $('#sysReboot').onclick=()=>doShutdown(true);
+      $('#sysAbout').onclick=()=>openApp('about');
+    }else if(sec==='storage'){
+      content.innerHTML=`
+      <div class="st-group"><h3>磁盘空间</h3>
+        ${storageRow('文件系统 /',fmtBytes(dirSize(getNode('/'))),'512 GB',61)}
+        ${storageRow('主目录 /home/myos',fmtBytes(dirSize(getNode('/home/myos'))),'256 GB',23)}
+        ${storageRow('配置与日志 /etc /var',fmtBytes(dirSize(getNode('/etc')))+' + '+fmtBytes(dirSize(getNode('/var/log'))),'8 GB',8)}
+      </div>`;
+    }else if(sec==='apps'){
+      content.innerHTML=`<div class="st-group"><h3>已安装应用</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px" id="appList"></div></div>`;
+      const box=$('#appList');
+      Object.entries(APPS).forEach(([id,a])=>{
+        const d=document.createElement('div');d.className='sm-tile';
+        d.innerHTML=`<div class="st-ico" style="width:44px;height:44px;border-radius:9px;background:var(--t-surface3);display:flex;align-items:center;justify-content:center;color:var(--t-text)">${ICON(a.icon,'width="24" height="24"')}</div><div class="st-label">${esc(a.title)}</div>`;
+        d.onclick=()=>openApp(id);
+        box.appendChild(d);
+      });
+    }
+  }
+  function storageRow(name,used,total,pct){
+    return '<div style="display:block;padding:12px 0"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px"><span>'+esc(name)+'</span><span style="font-size:11.5px;color:var(--t-text3)">'+esc(used)+' / '+total+'</span></div><div class="usage-bar"><i style="width:'+pct+'%"></i></div></div>';
+  }
+  showSec(opts&&opts.sec||'personal');
+}
+
+/* ================= 关于 / 规格卡片 ================= */
+function uptimeStr(){
+  const up=Math.floor((Date.now()-state.bootAt)/1000);
+  return Math.floor(up/3600)+' 小时 '+Math.floor(up%3600/60)+' 分 '+Math.floor(up%60)+' 秒';
+}
+function specCard(icon,label,val){
+  return '<div class="spec-card"><div class="sc-ico">'+ICON(icon)+'</div><div class="sc-label">'+esc(label)+'</div><div class="sc-val">'+val+'</div></div>';
+}
+function renderSpecs(box,win){
+  box.innerHTML=specCard('pc','设备名称','MyOS PC')+specCard('cpu','处理器','MyCore X1 · 8 核 @ 3.60GHz')+specCard('mem','内存','16 GB<div class="usage-bar"><i style="width:'+state.mem+'%"></i></div>')+specCard('disk','系统盘','MyData SSD 512 GB<div class="usage-bar"><i style="width:61%"></i></div>')+specCard('net','显卡','MyGPU X1 Acrylic 8GB')+specCard('info','系统版本','MyOS 1.0 · Linux 6.12.9-myos');
+  const up=document.createElement('div');up.className='spec-card';
+  up.innerHTML='<div class="sc-ico">'+ICON('clock')+'</div><div class="sc-label">运行时间</div><div class="sc-val" id="upVal">'+uptimeStr()+'</div>';
+  box.appendChild(up);
+  const iv=setInterval(()=>{const v=box.querySelector('#upVal');if(v)v.textContent=uptimeStr()},1000);
+  win.intervals.push(iv);
+}
+function initAbout(win,body){
+  const box=body.querySelector('#aboutSpecs');
+  renderSpecs(box,win);
+  const up=document.createElement('div');up.className='spec-card';
+  up.innerHTML='<div class="sc-ico">'+ICON('browser')+'</div><div class="sc-label">屏幕分辨率</div><div class="sc-val">'+innerWidth+' × '+innerHeight+'</div>';
+  box.appendChild(up);
+}
+
+/* ================= 记事本 ================= */
+function initNotepad(win,body,opts){
+  const ta=body.querySelector('#npText'),pathEl=body.querySelector('#npPath');
+  win.np={path:null};
+  if(opts&&opts.path){
+    const n=getNode(opts.path);
+    if(n&&n.type==='file'){ta.value=n.content;win.np.path=opts.path;pathEl.textContent=opts.path}
+  }
+  body.querySelector('[data-np="new"]').onclick=()=>{ta.value='';win.np.path=null;pathEl.textContent='未命名.txt';toast('记事本','已新建空白文档','new')};
+  body.querySelector('[data-np="save"]').onclick=()=>{
+    let p=win.np.path||'/home/myos/未命名.txt';
+    const par=getNode(parentOf(p));
+    if(!par)p='/home/myos/未命名.txt';
+    getNode(parentOf(p)).children[baseOf(p)]=F(ta.value);
+    win.np.path=p;pathEl.textContent=p;
+    toast('已保存',p,'save');
+  };
+  body.querySelector('[data-np="dl"]').onclick=()=>{
+    const blob=new Blob([ta.value],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(win.np.path?baseOf(win.np.path):'未命名.txt').replace(/[\\/:*?"<>|]/g,'_');
+    a.click();URL.revokeObjectURL(a.href);
+  };
+  body.querySelector('[data-np="open"]').onclick=()=>{
+    const files=listDir('/home/myos').filter(i=>i.node.type==='file');
+    if(!files.length){toast('记事本','主目录暂无文件','info');return}
+    const btns=files.slice(0,8).map(f=>({
+      label:f.name,
+      cls:'primary',
+      onClick:()=>{
+        ta.value=f.node.content;win.np.path='/home/myos/'+f.name;pathEl.textContent=win.np.path;
+        toast('已打开','/home/myos/'+f.name,'open');
+      }
+    }));
+    btns.push({label:'取消'});
+    dialog(win,{title:'打开文件',desc:'选择主目录下的文本文件：',buttons:btns});
+  };
+}
+
+/* ================= 计算器 ================= */
+function initCalc(win,body){
+  const main=body.querySelector('#cdMain'),sub=body.querySelector('#cdSub');
+  const keys=[
+    ['C','fn'],['⌫','fn'],['%','op'],['÷','op'],
+    ['7'],['8'],['9'],['×','op'],
+    ['4'],['5'],['6'],['−','op'],
+    ['1'],['2'],['3'],['+','op'],
+    ['±','fn'],['0'],['.','fn'],['=','eq']
+  ];
+  const box=body.querySelector('#calcKeys');
+  let expr='',justEq=false;
+  const pretty=s=>s.replace(/\*/g,'×').replace(/\//g,'÷').replace(/-/g,'−');
+  const refresh=()=>{sub.textContent=expr?pretty(expr):' ';main.textContent=expr?pretty(expr):'0'};
+  keys.forEach(([k,cls])=>{
+    const b=document.createElement('button');
+    b.textContent=k;
+    if(cls)b.className=cls;
+    b.onclick=()=>press(k);
+    box.appendChild(b);
+  });
+  function press(k){
+    if(k==='C'){expr='';justEq=false;refresh();return}
+    if(k==='⌫'){expr=expr.slice(0,-1);justEq=false;refresh();return}
+    if(k==='±'){
+      if(!expr)expr='-';
+      else if(/[+\-*/]$/.test(expr))expr+='-';
+      else expr=expr.replace(/(-?\d+(?:\.\d+)?)$/,m=>m.startsWith('-')?m.slice(1):'-'+m);
+      refresh();return;
+    }
+    if(k==='='){
+      if(!expr)return;
+      if(/^[0-9+\-*/().% ]+$/.test(expr)){
+        try{
+          const r=Function('return ('+expr+')')();
+          const res=typeof r==='number'&&isFinite(r)?Math.round(r*1e10)/1e10:NaN;
+          if(!isFinite(res)){main.textContent='错误';expr='';justEq=false;sub.textContent=' ';return}
+          main.textContent=String(res);
+          sub.textContent=pretty(expr)+' =';
+          expr=String(res);justEq=true;
+        }catch(err){main.textContent='错误';expr=''}
+      }
+      return;
+    }
+    if(k==='%'){expr+='/100';refresh();return}
+    const map={'÷':'/','×':'*','−':'-','.':'.'};
+    const ch=map[k]||k;
+    if(justEq&&/\d/.test(k)){expr='';justEq=false}
+    if(ch==='.'&&/\.\d*$/.test(expr)&&/\d/.test(expr))return;
+    if(ch==='.'&&!/\d/.test(expr)){expr=(expr||'0')+'.';refresh();return}
+    if('+-*/'.includes(ch)&&'+-*/'.includes(expr.slice(-1))){expr=expr.slice(0,-1)+ch;refresh();return}
+    if(expr.length>28)return;
+    expr+=ch;justEq=false;refresh();
+  }
+}
+
+/* ================= 浏览器 ================= */
+const SITES=[['豆包','https://www.doubao.com','#4E6EF2','豆'],['百度','https://www.baidu.com','#2932E1','度'],['B 站','https://www.bilibili.com','#FB7299','B'],['GitHub','https://github.com','#24292F','G'],['知乎','https://www.zhihu.com','#1772F6','知'],['必应','https://www.bing.com','#0E7CE0','必']];
+function initBrowser(win,body,opts){
+  const addr=body.querySelector('#brAddr'),bodyEl=body.querySelector('#brBody');
+  body.querySelector('#brHome').onclick=()=>{addr.value='myos://home';renderHome()};
+  body.querySelector('#brReload').onclick=()=>{toast('浏览器','已刷新（离线演示）','refresh');renderHome()};
+  body.querySelector('#brBack').onclick=()=>toast('浏览器','没有可返回的历史记录','info');
+  body.querySelector('#brFwd').onclick=()=>toast('浏览器','没有可前进的历史记录','info');
+  addr.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      const v=addr.value.trim();
+      if(/^https?:\/\//i.test(v)){window.open(v,'_blank','noopener');return}
+      renderResult(v);
+    }
+  });
+  function renderHome(){
+    bodyEl.innerHTML='<div class="browser-home"><h1>MyOS 浏览器</h1><div class="bh-sub">离线演示环境 · 快捷站点将调用系统真实浏览器打开</div><div class="bh-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="bhIn" placeholder="搜索或输入网址"><button id="bhGo">搜索</button></div><div class="bh-grid"></div></div>';
+    const grid=bodyEl.querySelector('.bh-grid');
+    SITES.forEach(([n,u,c,l])=>{
+      const d=document.createElement('div');d.className='bh-site';
+      d.innerHTML='<div class="bs-logo" style="background:'+c+'">'+l+'</div><span>'+n+'</span>';
+      d.onclick=()=>window.open(u,'_blank','noopener');
+      grid.appendChild(d);
+    });
+    const inp=bodyEl.querySelector('#bhIn');
+    bodyEl.querySelector('#bhGo').onclick=()=>{addr.value=inp.value;renderResult(inp.value)};
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){addr.value=inp.value;renderResult(inp.value)}});
+    inp.focus();
+  }
+  function renderResult(q){
+    addr.value=q;
+    bodyEl.innerHTML='<div class="browser-result"><div style="font-size:16px;font-weight:600;margin-bottom:12px">“'+esc(q)+'” 的搜索结果</div><div style="margin-bottom:18px;color:var(--t-text3)">当前为离线演示模式，未发起真实网络搜索。</div><div class="st-group"><h3>可以试试</h3><div style="line-height:2">在终端输入 <b>help</b> 查看系统命令<br>打开 <b>文件</b> 浏览 Linux 风格的文件系统<br>在 <b>设置</b> 里切换壁纸与主题<br>按 <b>Win+L</b> 锁定屏幕</div></div></div>';
+  }
+  if(opts&&opts.query)renderResult(opts.query);
+  else{addr.value='myos://home';renderHome()}
+}
+
+/* ================= 照片 ================= */
+function initGallery(win,body){
+  const grid=body.querySelector('#galGrid'),viewer=body.querySelector('#galViewer'),img=body.querySelector('#galViewImg');
+  let sel=parseInt(state.wallpaper.replace('wp-',''))||1;
+  for(let i=1;i<=4;i++){
+    const d=document.createElement('div');d.className='g-item wp-'+i+(i===sel?' on':'');
+    d.innerHTML='<div class="g-set">设为壁纸</div>';
+    d.ondblclick=()=>{setWallpaper('wp-'+i);toast('壁纸','已应用 wp-'+i,'check')};
+    d.onclick=()=>{
+      grid.querySelectorAll('.g-item').forEach(x=>x.classList.remove('on'));
+      d.classList.add('on');sel=i;
+      img.style.backgroundImage="url('assets/wallpapers/wp-"+i+".jpg')";
+      viewer.classList.add('on');
+    };
+    grid.appendChild(d);
+  }
+  body.querySelector('#galClose').onclick=()=>viewer.classList.remove('on');
+  body.querySelector('#galSet').onclick=()=>{setWallpaper('wp-'+sel);viewer.classList.remove('on');toast('壁纸','已应用 wp-'+sel,'check')};
+}
+
+/* ================= 回收站 ================= */
+function initTrash(win,body){
+  const list=body.querySelector('#trList'),count=body.querySelector('#trCount');
+  const render=()=>{
+    list.innerHTML='';
+    count.textContent=state.trash.length?('回收站 · '+state.trash.length+' 项'):'回收站为空';
+    if(!state.trash.length){list.innerHTML='<div class="files-empty">回收站是空的，删除的文件会出现在这里</div>';return}
+    state.trash.forEach((it,i)=>{
+      const d=document.createElement('div');d.className='tr-item';
+      d.innerHTML='<div class="ti-ico">'+ICON('file')+'</div><div class="ti-name">'+esc(it.name)+'</div><div style="font-size:11.5px;color:var(--t-text3)">'+esc(it.path)+'</div><div class="ti-actions"><button data-a="restore">还原</button><button data-a="del">永久删除</button></div>';
+      d.querySelector('[data-a="restore"]').onclick=()=>{
+        const par=getNode(parentOf(it.path));
+        if(par&&!(it.name in par.children)){par.children[it.name]=it.node;state.trash.splice(i,1);toast('已还原',it.path,'restoreItem')}
+        else toast('还原失败','原路径已不存在同名文件','info');
+        render();
+      };
+      d.querySelector('[data-a="del"]').onclick=()=>{
+        dialog(win,{title:'永久删除',desc:'确定要永久删除“'+it.name+'”吗？此操作无法撤销。',buttons:[{label:'删除',cls:'danger',onClick:()=>{state.trash.splice(i,1);render();toast('已永久删除',it.name,'trash')}},{label:'取消'}]});
+      };
+      list.appendChild(d);
+    });
+  };
+  body.querySelector('#trEmpty').onclick=()=>{
+    if(!state.trash.length)return;
+    dialog(win,{title:'清空回收站',desc:'将永久删除回收站中的 '+state.trash.length+' 个项目。',buttons:[{label:'清空',cls:'danger',onClick:()=>{state.trash=[];render();toast('回收站','已清空','trash')}},{label:'取消'}]});
+  };
+  render();
+}
+
+/* ================= 此电脑 ================= */
+function initPC(win,body){
+  const box=body.querySelector('#pcCards');
+  const cards=[
+    {icon:'disk',name:'文件系统 /',cap:'系统盘 · 512 GB 总计',use:'已用 313 GB · 61%',pct:61,go:()=>openApp('files',{navigate:'/'})},
+    {icon:'home',name:'主目录',cap:'/home/myos · 256 GB 总计',use:'已用 '+fmtBytes(dirSize(getNode('/home/myos')))+' · 23%',pct:23,go:()=>openApp('files',{navigate:'/home/myos'})},
+    {icon:'trash',name:'回收站',cap:state.trash.length+' 个项目',use:state.trash.length?'包含被删除的文件':'空空如也',pct:Math.min(100,state.trash.length*20),go:()=>openApp('trash')}
+  ];
+  cards.forEach(c=>{
+    const d=document.createElement('div');d.className='pc-card';
+    d.innerHTML='<div class="pcc-top"><div class="pcc-ico">'+ICON(c.icon)+'</div><div><div class="pcc-name">'+esc(c.name)+'</div><div class="pcc-cap">'+esc(c.cap)+'</div></div></div><div class="usage-bar"><i style="width:'+c.pct+'%"></i></div><div class="pcc-use"><span>'+esc(c.use)+'</span></div>';
+    d.onclick=c.go;
+    box.appendChild(d);
+  });
+}
+
+/* ================= 主题 / 壁纸 / 强调色 ================= */
+function setTheme(t){
+  state.theme=t;
+  document.documentElement.classList.toggle('light',t==='light');
+  toast('主题',t==='dark'?'已切换为深色模式':'已切换为浅色模式','sun');
+  const w=state.wins.find(x=>x.app==='settings');
+  if(w)initSettings(w,w.bodyEl,{sec:'personal'});
+}
+function setWallpaper(wp){
+  state.wallpaper=wp;
+  const w=$('#wallpaper');
+  w.className=wp;
+  w.style.filter='brightness('+state.bright/100+')';
+  toast('壁纸','已应用 '+(parseInt(wp.replace('wp-','')))+' 号壁纸','gallery');
+  const sw=state.wins.find(x=>x.app==='settings');
+  if(sw)initSettings(sw,sw.bodyEl,{sec:'personal'});
+}
+function setAccent(c){
+  state.accent=c;
+  document.documentElement.style.setProperty('--accent',c);
+  document.documentElement.style.setProperty('--accent-2',c==='#E3008C'?'#ff66b8':c==='#CA5010'?'#ff9a5c':'#45A9FF');
+  const sw=state.wins.find(x=>x.app==='settings');
+  if(sw)initSettings(sw,sw.bodyEl,{sec:'personal'});
+}
+
+/* ================= 启动 ================= */
+window.addEventListener('DOMContentLoaded',()=>{
+  $('#startBtn').innerHTML=LOGO;
+  doBoot();
+  renderStartGrid();
+});
+</script>
+</body>
+</html>
