@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
-  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v1.0.2/Jiansetup.zip",
-  "notes": "弹窗改为火绒风格"
+  "version": "1.0.4",
+  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v1.0.4/JianRongSecuritySetup.exe",
+  "notes": "增加云分析，注册功能"
 }
