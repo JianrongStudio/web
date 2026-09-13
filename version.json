@@ -1,5 +1,5 @@
 {
   "version": "1.0.1",
-  "url": "https://github.com/jianrongstudio/JianrongSecurity/releases/download/v1.0.1/JianRongSecurity.zip",
+  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v1.0.1/JianRongSecurity_v1.0.1.zip",
   "notes": "修复误报问题\n新增YARA规则\n优化扫描速度"
 }
