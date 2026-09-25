@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
-  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v1.0.8/JianRongSecuritySetup.exe",
-  "notes": "优化威胁弹窗，采用红色盾牌已阻止样式"
+  "version": "2.0.0",
+  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v2.0.0/JianRongSecuritySetup.exe",
+  "notes": "全新 Qt6 界面，单文件离线安装包，内置 PYAS 官方内核驱动"
 }
