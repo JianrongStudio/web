@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
-  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v2.0.0/JianRongSecuritySetup.exe",
-  "notes": "全新 Qt6 界面，单文件离线安装包，内置 PYAS 官方内核驱动"
+  "version": "2.0.1",
+  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v2.0.1/JianRongSecuritySetup.exe",
+  "notes": "方案B修复版：恢复用户态防护（YARA/实时监控/自定义扫描/右键扫描/云分析），驱动兜底"
 }
