@@ -1,5 +1,3 @@
 {
-  "version": "2.0.1",
-  "url": "https://gh-proxy.org/https://github.com/JianrongStudio/JianrongSecurity-/releases/download/v2.0.1/JianRongSecuritySetup.exe",
-  "notes": "方案B修复版：恢复用户态防护（YARA/实时监控/自定义扫描/右键扫描/云分析），驱动兜底"
+  "download-url":"https://gh-proxy.org/https://github.com/JianrongStudio/JianrongInternetSecurity/releases/download/Sousen0.0.1/JianRongSecurity.zip"
 }
