@@ -103,7 +103,7 @@ code{font-family:Consolas,monospace;}
 <p>接入流程：本地读取文件 → 本地计算TLSH哈希 → POST提交哈希到云端 → 云端比对恶意样本库，返回查杀结果。</p>
 
 <h2 id="base">2. 基础接口信息</h2>
-<p>基础地址：<code>https://你的域名.pythonanywhere.com</code>（替换成你自己的网站地址）</p>
+<p>基础地址：<code>https://jianrongstudio.pythonanywhere.com</code>（null）</p>
 <table>
     <tr>
         <th>接口地址</th>
@@ -199,7 +199,7 @@ code{font-family:Consolas,monospace;}
 import requests
 
 # ========= 配置，修改为你的云端地址 =========
-API_URL = "https://你的域名.pythonanywhere.com/api/query_hash"
+API_URL = "https://jianrongstudio.pythonanywhere.com/api/query_hash"
 # ===========================================
 
 def get_file_tlsh(file_path: str):
